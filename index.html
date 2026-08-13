@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EstateFlow v7</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f5f9;
+    color: #1f2937;
+  }
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 235px;
+    background: #fff;
+    border-left: 1px solid #dbe2ea;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+  .logo {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid #e7edf4;
+  }
+  .logo h1 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -1px;
+  }
+  .logo .blue { color: #1d4ed8; }
+  .logo .orange { color: #f59e0b; }
+  .logo small {
+    display: block;
+    color: #6b7280;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+  .side-search {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eef2f7;
+  }
+  .side-search input {
+    width: 100%;
+    border: 1px solid #d6dee8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+  }
+  .nav {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .nav-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: #334155;
+    text-align: right;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .nav-btn.active, .nav-btn:hover {
+    background: #eef4ff;
+    color: #2563eb;
+  }
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 12px 14px;
+    border-top: 1px solid #e7edf4;
+  }
+  .user-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+  }
+  .user-money {
+    color: #16a34a;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .main {
+    flex: 1;
+    padding: 24px;
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title-row {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .page-title {
+    margin: 0;
+    font-size: 42px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  .page-subtitle {
+    color: #64748b;
+    margin-top: 7px;
+    font-size: 15px;
+  }
+  .top-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  button {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .btn-blue { background: #2563eb; color: #fff; }
+  .btn-orange { background: #f97316; color: #fff; }
+  .btn-gold { background: #d4a017; color: #fff; }
+  .btn-gray { background: #e5e7eb; color: #111827; }
+  .btn-red { background: #dc2626; color: #fff; }
+  .btn-small { padding: 8px 12px; font-size: 13px; }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .kpi {
+    background: #fff;
+    border: 1px solid #e7edf4;
+    border-radius: 16px;
+    padding: 18px;
+  }
+  .kpi-label {
+    color: #7b8794;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-size: 21px;
+    font-weight: 900;
+  }
+  .value-orange { color: #f59e0b; }
+  .value-deep-orange { color: #f97316; }
+  .value-purple { color: #7c3aed; }
+  .value-blue { color: #2563eb; }
+  .value-gray { color: #94a3b8; }
+  .value-green { color: #16a34a; }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #e7edf4;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .panel-title {
+    margin: 0;
+    font-size: 22px;
+    color: #0f172a;
+  }
+  .message {
+    background: #f8fafc;
+    border: 1px solid #dbe5ef;
+    border-radius: 14px;
+    padding: 15px;
+    color: #475569;
+    margin-bottom: 22px;
+  }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+  }
+  .property-card {
+    background: #fff;
+    border: 1px solid #e5ebf3;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .property-art {
+    height: 145px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 54px;
+    background: linear-gradient(135deg, #dbeafe, #fef3c7);
+  }
+  .property-art.office { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+  .property-art.store { background: linear-gradient(135deg, #ffedd5, #fed7aa); }
+  .property-art.house { background: linear-gradient(135deg, #e0f2fe, #fef3c7); }
+  .property-art.warehouse { background: linear-gradient(135deg, #e5e7eb, #cbd5e1); }
+
+  .property-body {
+    padding: 14px;
+  }
+  .property-name {
+    font-size: 19px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .property-city {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .property-big {
+    font-size: 28px;
+    font-weight: 900;
+    color: #2563eb;
+    margin-bottom: 5px;
+  }
+  .property-rent {
+    color: #16a34a;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .mini-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .mini-stat {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .mini-stat-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  .mini-stat-value {
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .filters-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto auto;
+    gap: 12px;
+    align-items: end;
+  }
+  .field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .field input, .field select {
+    width: 100%;
+    border: 1px solid #d6dee8;
+    background: #fff;
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  .market-grid, .portfolio-grid, .auction-grid, .mission-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .detail-card {
+    background: #fff;
+    border: 1px solid #e5ebf3;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .detail-body {
+    padding: 14px;
+  }
+  .detail-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .detail-sub {
+    color: #6b7280;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 12px;
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 14px;
+  }
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .empty {
+    color: #64748b;
+    padding: 6px 0;
+  }
+  .positive { color: #16a34a; font-weight: 800; }
+  .negative { color: #dc2626; font-weight: 800; }
+
+  .bank-layout {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 20px;
+  }
+  .loan-offer {
+    border: 1px solid #e5ebf3;
+    border-radius: 14px;
+    padding: 15px;
+    background: #fbfcfe;
+    margin-bottom: 12px;
+  }
+  .loan-offer-title {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .progress-wrap {
+    margin-top: 12px;
+  }
+  .progress-bar {
+    height: 11px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #84cc16;
+    border-radius: 999px;
+  }
+  .tabs {
+    display: flex;
+    gap: 14px;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e5ebf3;
+  }
+  .tab {
+    padding: 10px 0;
+    font-weight: 800;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+  .tab.active {
+    color: #f97316;
+    border-bottom-color: #f97316;
+  }
+  .auction-card {
+    border: 1px solid #e5ebf3;
+    border-radius: 16px;
+    padding: 14px;
+    background: #fff;
+  }
+  .tag {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .tag.orange { background: #ffedd5; color: #ea580c; }
+  .tag.blue { background: #dbeafe; color: #1d4ed8; }
+  .mission-card {
+    border: 1px solid #e5ebf3;
+    border-radius: 16px;
+    padding: 16px;
+    background: #fff;
+  }
+  .mission-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .mission-desc {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 1300px) {
+    .filters-grid {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+    .kpis {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 950px) {
+    .app { display: block; }
+    .sidebar {
+      width: 100%;
+      min-height: auto;
+      position: relative;
+      border-left: 0;
+      border-bottom: 1px solid #dbe2ea;
+    }
+    .main { padding: 16px; }
+    .overview-grid, .bank-layout {
+      grid-template-columns: 1fr;
+    }
+    .page-title-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .kpis {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .filters-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .kpis, .filters-grid {
+      grid-template-columns: 1fr;
+    }
+    .page-title { font-size: 30px; }
+    .meta-grid, .mini-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <h1><span class="blue">Estate</span><span class="orange">Flow</span></h1>
+      <small>כלכלה, נדל״ן והשקעות</small>
+    </div>
+
+    <div class="side-search">
+      <input type="text" placeholder="חיפוש שחקנים (עיצוב בלבד)">
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn active" data-page="overview"><span>לוח בקרה</span><span>📊</span></button>
+      <button class="nav-btn" data-page="market"><span>שוק</span><span>🏪</span></button>
+      <button class="nav-btn" data-page="bank"><span>בנק</span><span>🏦</span></button>
+      <button class="nav-btn" data-page="auctions"><span>מכרזים</span><span>🔨</span></button>
+      <button class="nav-btn" data-page="missions"><span>משימות</span><span>🎯</span></button>
+      <button class="nav-btn" data-page="portfolio"><span>תיק השקעות</span><span>💼</span></button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-box">
+        <div class="user-money" id="sideCash"></div>
+        <div>eviatar2015</div>
+        <div style="margin-top:6px; color:#64748b;">חודש במשחק: <span id="sideMonth"></span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div id="page-overview" class="page active">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">לוח הבקרה שלי</h1>
+          <div class="page-subtitle">סקירה כללית של המצב הכלכלי שלך</div>
+        </div>
+        <div class="top-actions">
+          <button class="btn-orange" onclick="showPage('market')">שוק נדל״ן</button>
+          <button class="btn-gold" onclick="showPage('bank')">בנק</button>
+          <button class="btn-blue" onclick="nextMonth()">העבר חודש</button>
+          <button class="btn-gray" onclick="refreshMarket()">רענן שוק</button>
+          <button class="btn-red" onclick="resetGame()">התחל מחדש</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">יתרה</div><div class="kpi-value value-deep-orange" id="cash"></div></div>
+        <div class="kpi"><div class="kpi-label">שווי כולל</div><div class="kpi-value value-orange" id="netWorth"></div></div>
+        <div class="kpi"><div class="kpi-label">שווי נכסים</div><div class="kpi-value value-blue" id="assets"></div></div>
+        <div class="kpi"><div class="kpi-label">חוב לבנק</div><div class="kpi-value value-gray" id="debt"></div></div>
+        <div class="kpi"><div class="kpi-label">הכנסות שכירות</div><div class="kpi-value value-purple" id="rentalIncomeTop"></div></div>
+      </div>
+
+      <div class="message" id="message">ברוך הבא! יש לך ₪250,000. קנה נכסים במזומן, ואם חסר כסף אפשר לקחת הלוואה מהבנק.</div>
+
+      <div class="overview-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">הנכסים שלי</h2>
+            <button class="btn-gray btn-small" onclick="showPage('portfolio')">תיק הנכסים</button>
+          </div>
+          <div class="cards-grid" id="ownedCards"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">תקציר מהיר</h2>
+          </div>
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">מספר נכסים</div>
+              <div class="mini-stat-value" id="ownedCount"></div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">חודש במשחק</div>
+              <div class="mini-stat-value" id="month"></div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">החזר חודשי לבנק</div>
+              <div class="mini-stat-value value-orange" id="bankPaymentQuick"></div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">שווי שכירות חודשי</div>
+              <div class="mini-stat-value value-green" id="rentalIncomeBig"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-market" class="page">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">שוק הנדל״ן</h1>
+          <div class="page-subtitle">חפש עסקאות, סנן נכסים וקנה את ההזדמנות הבאה שלך</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="filters-grid">
+          <div class="field">
+            <label>חיפוש</label>
+            <input type="text" id="filterSearch" placeholder="חפש לפי שם, עיר...">
+          </div>
+          <div class="field">
+            <label>מחיר מינימום</label>
+            <input type="number" id="filterMinPrice" placeholder="0">
+          </div>
+          <div class="field">
+            <label>מחיר מקסימום</label>
+            <input type="number" id="filterMaxPrice" placeholder="9999999">
+          </div>
+          <div class="field">
+            <label>עיר</label>
+            <select id="filterCity">
+              <option value="">כל הערים</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>סוג</label>
+            <select id="filterType">
+              <option value="">כל הסוגים</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>מיון</label>
+            <select id="filterSort">
+              <option value="new">החדשים ביותר</option>
+              <option value="priceAsc">מחיר מהנמוך לגבוה</option>
+              <option value="priceDesc">מחיר מהגבוה לנמוך</option>
+              <option value="rentDesc">שכירות מהגבוה לנמוך</option>
+              <option value="yieldDesc">תשואה מהגבוה לנמוך</option>
+            </select>
+          </div>
+          <button class="btn-blue" onclick="renderMarket()">החל סינון</button>
+          <button class="btn-gray" onclick="resetFilters()">איפוס</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">נכסים בשוק</h2>
+          <div id="marketStats"></div>
+        </div>
+        <div class="market-grid" id="marketGrid"></div>
+      </div>
+    </div>
+
+    <div id="page-bank" class="page">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">בנק</h1>
+          <div class="page-subtitle">נהל את האשראי שלך וקח הלוואות לצמיחה מהירה יותר</div>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">מזומן זמין</div><div class="kpi-value value-deep-orange" id="bankCash"></div></div>
+        <div class="kpi"><div class="kpi-label">שווי נטו</div><div class="kpi-value value-orange" id="bankNetWorth"></div></div>
+        <div class="kpi"><div class="kpi-label">תשלום חודשי</div><div class="kpi-value value-blue" id="bankPayment"></div></div>
+        <div class="kpi"><div class="kpi-label">חוב כולל</div><div class="kpi-value value-gray" id="bankDebt"></div></div>
+        <div class="kpi"><div class="kpi-label">ציון אשראי</div><div class="kpi-value value-green" id="creditScoreValue"></div></div>
+      </div>
+
+      <div class="bank-layout">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">הלוואה חדשה</h2>
+          </div>
+
+          <div id="loanOffers"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">מצב אשראי</h2>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <div style="color:#64748b; margin-bottom:8px;">גורמי אשראי</div>
+              <div style="margin-bottom:10px;">יחס חוב / נכסים</div>
+              <div style="margin-bottom:10px;">הלוואות פעילות</div>
+              <div style="margin-bottom:10px;">הלוואה מקסימלית</div>
+            </div>
+            <div>
+              <div style="color:#84cc16; font-weight:900; margin-bottom:8px;" id="creditStatus"></div>
+              <div style="margin-bottom:10px;" id="debtRatioText"></div>
+              <div style="margin-bottom:10px;" id="activeLoansText"></div>
+              <div style="margin-bottom:10px;" id="maxLoanText"></div>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <span>ציון אשראי</span>
+              <span id="creditScoreFraction"></span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="creditScoreBar"></div></div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <button class="btn-gray" onclick="repayLoan(50000)">החזר ₪50,000</button>
+            <button class="btn-gray" onclick="repayLoan(100000)">החזר ₪100,000</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-auctions" class="page">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">מכרזים 🔨</h1>
+          <div class="page-subtitle">הזדמנויות ייחודיות למכירה מהירה או לרווח עתידי</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">מכרזים מומלצים</h2>
+          <button class="btn-blue" onclick="regenerateAuctions()">רענן מכרזים</button>
+        </div>
+        <div class="auction-grid" id="auctionGrid"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">סטטיסטיקות המכרזים שלי</h2>
+        </div>
+        <div class="kpis" style="margin:0;">
+          <div class="kpi"><div class="kpi-label">מכרזים שצפית בהם</div><div class="kpi-value" id="auctionViewed"></div></div>
+          <div class="kpi"><div class="kpi-label">הצעות שהוגשו</div><div class="kpi-value" id="auctionBids"></div></div>
+          <div class="kpi"><div class="kpi-label">אחוז ניצחון</div><div class="kpi-value" id="auctionWinRate"></div></div>
+          <div class="kpi"><div class="kpi-label">סכום הצעות</div><div class="kpi-value" id="auctionTotalBids"></div></div>
+          <div class="kpi"><div class="kpi-label">זכיות</div><div class="kpi-value" id="auctionWins"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-missions" class="page">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">משימות ואתגרים</h1>
+          <div class="page-subtitle">השלם יעדים ותבנה לעצמך שם של משקיע מצליח</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active">פעולות</div>
+        <div class="tab">הושלמו</div>
+        <div class="tab">נקבעו</div>
+      </div>
+
+      <div class="mission-grid" id="missionGrid"></div>
+    </div>
+
+    <div id="page-portfolio" class="page">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">תיק ההשקעות שלי</h1>
+          <div class="page-subtitle">כל הנכסים שברשותך במקום אחד</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">נכסים בבעלות</h2>
+          <div id="portfolioStats"></div>
+        </div>
+        <div class="portfolio-grid" id="portfolioGrid"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const fmt = n => new Intl.NumberFormat('he-IL', {
+  style: 'currency',
+  currency: 'ILS',
+  maximumFractionDigits: 0
+}).format(Math.round(n));
+
+const propertyTemplates = [
+  {type:'דירת סטודיו', area:'באר שבע', price:[420000,560000], rent:[2200,2900], expenses:[280,420], icon:'🏠', art:'house'},
+  {type:'דירת 2 חדרים', area:'חיפה', price:[500000,650000], rent:[2500,3300], expenses:[330,500], icon:'🏘️', art:'house'},
+  {type:'דירת 3 חדרים', area:'באר שבע', price:[650000,850000], rent:[3000,3900], expenses:[400,650], icon:'🏘️', art:'house'},
+  {type:'דירת 4 חדרים', area:'פתח תקווה', price:[1100000,1450000], rent:[4700,6200], expenses:[650,900], icon:'🏡', art:'house'},
+  {type:'משרד קטן', area:'ראשון לציון', price:[780000,1050000], rent:[4800,6500], expenses:[700,1100], icon:'🏢', art:'office'},
+  {type:'חנות', area:'נתניה', price:[700000,1000000], rent:[4500,6500], expenses:[650,1000], icon:'🏪', art:'store'},
+  {type:'מחסן מסחרי', area:'אשדוד', price:[500000,780000], rent:[3500,5200], expenses:[450,750], icon:'🏭', art:'warehouse'},
+  {type:'בניין משרדים', area:'תל אביב', price:[1800000,2800000], rent:[9000,16000], expenses:[1200,1900], icon:'🏙️', art:'office'},
+  {type:'מרכז מסחרי', area:'ירושלים', price:[2200000,3600000], rent:[12000,22000], expenses:[1500,2400], icon:'🏬', art:'store'}
+];
+
+const loanOffers = [
+  {amount:50000, months:12},
+  {amount:100000, months:24},
+  {amount:250000, months:36},
+  {amount:500000, months:48},
+  {amount:1000000, months:60}
+];
+
+const localKey = 'realEstateEmpireV7';
+
+let state = loadGame() || {
+  cash: 250000,
+  month: 1,
+  owned: [],
+  market: [],
+  bankDebt: 0,
+  bankLoanRate: 0.06,
+  bankLoanMonths: 60,
+  currentPage: 'overview',
+  auctionViewed: 0,
+  auctionBids: 0,
+  auctionWins: 0,
+  auctionTotalBids: 0,
+  auctions: []
+};
+
+if (!state.market.length) generateMarket();
+if (!state.auctions.length) generateAuctions();
+
+const navButtons = document.querySelectorAll('.nav-btn');
+navButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    showPage(btn.dataset.page);
+  });
+});
+
+function saveGame() {
+  localStorage.setItem(localKey, JSON.stringify(state));
+}
+
+function loadGame() {
+  try {
+    return JSON.parse(localStorage.getItem(localKey));
+  } catch {
+    return null;
+  }
+}
+
+function rand(min, max) {
+  return Math.round(min + Math.random() * (max - min));
+}
+
+function makeProperty(template, i=0) {
+  const price = rand(template.price[0], template.price[1]);
+  const rent = rand(template.rent[0], template.rent[1]);
+  const expenses = rand(template.expenses[0], template.expenses[1]);
+  return {
+    id: Date.now() + i + Math.random(),
+    type: template.type,
+    area: template.area,
+    price,
+    purchasePrice: price,
+    rent,
+    expenses,
+    icon: template.icon,
+    art: template.art,
+    monthsOwned: 0
+  };
+}
+
+function generateMarket() {
+  state.market = [];
+  const starter = propertyTemplates.filter(p => p.price[0] <= 650000);
+  if (state.month === 1) {
+    starter.slice(0,3).forEach((t, i) => state.market.push(makeProperty(t, i)));
+  }
+  while (state.market.length < 9) {
+    const t = propertyTemplates[rand(0, propertyTemplates.length - 1)];
+    state.market.push(makeProperty(t, state.market.length));
+  }
+  saveGame();
+}
+
+function generateAuctions() {
+  state.auctions = [];
+  for (let i = 0; i < 4; i++) {
+    const t = propertyTemplates[rand(0, propertyTemplates.length - 1)];
+    const p = makeProperty(t, i);
+    const marketPrice = p.price;
+    const openingBid = Math.round(marketPrice * (0.72 + Math.random() * 0.12));
+    const daysLeft = rand(1, 4);
+    state.auctions.push({
+      id: p.id,
+      type: p.type,
+      area: p.area,
+      price: marketPrice,
+      openingBid,
+      rent: p.rent,
+      icon: p.icon,
+      art: p.art,
+      daysLeft,
+      bids: rand(0, 2)
+    });
+  }
+  saveGame();
+}
+
+function regenerateAuctions() {
+  generateAuctions();
+  setMessage('רשימת המכרזים התעדכנה.');
+  render();
+}
+
+function setMessage(text) {
+  document.getElementById('message').textContent = text;
+}
+
+function showPage(page) {
+  state.currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  navButtons.forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  saveGame();
+}
+
+function monthlyBankPaymentFor(amount, months) {
+  const monthlyRate = state.bankLoanRate / 12;
+  return Math.round(amount * monthlyRate + amount / months);
+}
+
+function monthlyBankPayment() {
+  if (state.bankDebt <= 0) return 0;
+  const monthlyRate = state.bankLoanRate / 12;
+  return Math.round(state.bankDebt * monthlyRate + state.bankDebt / Math.max(1, state.bankLoanMonths));
+}
+
+function takeLoan(amount, months = 60) {
+  state.cash += amount;
+  state.bankDebt += amount;
+  state.bankLoanMonths = Math.max(state.bankLoanMonths, months);
+  setMessage(`קיבלת הלוואה מהבנק בסך ${fmt(amount)}. יתרת החוב שלך כעת היא ${fmt(state.bankDebt)}.`);
+  saveGame();
+  render();
+  showPage('bank');
+}
+
+function repayLoan(amount) {
+  if (state.bankDebt <= 0) {
+    setMessage('אין לך כרגע חוב לבנק.');
+    return;
+  }
+  const repayment = Math.min(amount, state.bankDebt, state.cash);
+  if (repayment <= 0) {
+    setMessage('אין לך מספיק מזומן כדי להחזיר הלוואה.');
+    return;
+  }
+  state.cash -= repayment;
+  state.bankDebt -= repayment;
+  setMessage(`החזרת לבנק ${fmt(repayment)}. יתרת החוב כעת היא ${fmt(state.bankDebt)}.`);
+  saveGame();
+  render();
+}
+
+function buyProperty(id) {
+  const p = state.market.find(x => x.id === id);
+  if (!p) return;
+
+  if (state.cash < p.price) {
+    setMessage(`אין לך מספיק מזומן לקניית הנכס. חסרים לך ${fmt(p.price - state.cash)}. אפשר לקחת הלוואה מהבנק.`);
+    showPage('bank');
+    return;
+  }
+
+  state.cash -= p.price;
+  state.owned.push({...p, purchasePrice: p.price, monthsOwned: 0});
+  state.market = state.market.filter(x => x.id !== id);
+  setMessage(`רכשת ${p.type} ב${p.area} במזומן תמורת ${fmt(p.price)}.`);
+  saveGame();
+  render();
+}
+
+function sellProperty(id) {
+  const p = state.owned.find(x => x.id === id);
+  if (!p) return;
+
+  const sellingCosts = Math.round(p.price * 0.02);
+  const proceeds = p.price - sellingCosts;
+  state.cash += proceeds;
+  state.owned = state.owned.filter(x => x.id !== id);
+
+  setMessage(`מכרת את הנכס. לאחר עלויות מכירה של 2% קיבלת ${fmt(proceeds)}.`);
+  saveGame();
+  render();
+}
+
+function bidAuction(id) {
+  const a = state.auctions.find(x => x.id === id);
+  if (!a) return;
+  state.auctionViewed += 1;
+  state.auctionBids += 1;
+  state.auctionTotalBids += a.openingBid;
+  const win = Math.random() < 0.38;
+  if (win && state.cash >= a.openingBid) {
+    state.auctionWins += 1;
+    state.cash -= a.openingBid;
+    state.owned.push({
+      id: a.id,
+      type: a.type,
+      area: a.area,
+      price: a.openingBid,
+      purchasePrice: a.openingBid,
+      rent: a.rent,
+      expenses: Math.round(a.rent * 0.18),
+      icon: a.icon,
+      art: a.art,
+      monthsOwned: 0
+    });
+    setMessage(`זכית במכרז על ${a.type} ב${a.area} במחיר ${fmt(a.openingBid)}.`);
+    state.auctions = state.auctions.filter(x => x.id !== id);
+  } else if (win) {
+    setMessage('הצעת זכייה — אבל אין לך מספיק מזומן. נסה לקחת הלוואה לפני המכרז הבא.');
+  } else {
+    setMessage(`הגשת הצעה על ${a.type}, אבל מישהו אחר הציע יותר.`);
+  }
+  saveGame();
+  render();
+}
+
+function nextMonth() {
+  let rentalIncome = 0;
+  let totalExpenses = 0;
+
+  state.owned.forEach(p => {
+    p.monthsOwned++;
+    const vacancy = Math.random() < 0.06;
+    if (!vacancy) rentalIncome += p.rent;
+    totalExpenses += p.expenses;
+
+    const marketChange = (Math.random() * 0.04) - 0.015;
+    p.price = Math.max(100000, Math.round(p.price * (1 + marketChange)));
+
+    const rentChange = (Math.random() * 0.012) - 0.003;
+    p.rent = Math.max(1000, Math.round(p.rent * (1 + rentChange)));
+  });
+
+  let bankPayment = 0;
+  if (state.bankDebt > 0) {
+    const interest = state.bankDebt * (state.bankLoanRate / 12);
+    const principal = Math.min(state.bankDebt, state.bankDebt / Math.max(1, state.bankLoanMonths));
+    bankPayment = Math.round(interest + principal);
+    state.bankDebt = Math.max(0, state.bankDebt - principal);
+    state.bankLoanMonths = Math.max(1, state.bankLoanMonths - 1);
+  }
+
+  const monthlyNet = rentalIncome - totalExpenses - bankPayment;
+  state.cash += monthlyNet;
+  state.month++;
+
+  if (state.month % 3 === 0) generateMarket();
+  if (state.month % 2 === 0) generateAuctions();
+
+  setMessage(`חודש ${state.month}: שכירות ${fmt(rentalIncome)}, הוצאות ${fmt(totalExpenses)}, החזר לבנק ${fmt(bankPayment)}. תזרים חודשי: ${fmt(monthlyNet)}.`);
+  saveGame();
+  render();
+}
+
+function refreshMarket() {
+  generateMarket();
+  setMessage('שוק הנכסים התרענן ונוספו עסקאות חדשות.');
+  render();
+}
+
+function resetGame() {
+  if (!confirm('להתחיל מחדש? כל ההתקדמות תימחק.')) return;
+  localStorage.removeItem(localKey);
+  state = {
+    cash: 250000,
+    month: 1,
+    owned: [],
+    market: [],
+    bankDebt: 0,
+    bankLoanRate: 0.06,
+    bankLoanMonths: 60,
+    currentPage: 'overview',
+    auctionViewed: 0,
+    auctionBids: 0,
+    auctionWins: 0,
+    auctionTotalBids: 0,
+    auctions: []
+  };
+  generateMarket();
+  generateAuctions();
+  setMessage('המשחק אופס. בהצלחה!');
+  render();
+  showPage('overview');
+}
+
+function getYield(p) {
+  return ((p.rent * 12 - p.expenses * 12) / p.price * 100);
+}
+
+function typeLabel(t) {
+  return t.includes('משרד') || t.includes('בניין') ? 'משרד'
+       : t.includes('חנות') || t.includes('מרכז') ? 'מסחרי'
+       : t.includes('מחסן') ? 'מחסן'
+       : 'מגורים';
+}
+
+function resetFilters() {
+  document.getElementById('filterSearch').value = '';
+  document.getElementById('filterMinPrice').value = '';
+  document.getElementById('filterMaxPrice').value = '';
+  document.getElementById('filterCity').value = '';
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterSort').value = 'new';
+  renderMarket();
+}
+
+function populateFilterOptions() {
+  const citySel = document.getElementById('filterCity');
+  const typeSel = document.getElementById('filterType');
+
+  const cities = [...new Set(state.market.map(p => p.area))];
+  const types = [...new Set(state.market.map(p => typeLabel(p.type)))];
+
+  citySel.innerHTML = '<option value="">כל הערים</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
+  typeSel.innerHTML = '<option value="">כל הסוגים</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+function filteredMarket() {
+  const search = document.getElementById('filterSearch').value.trim().toLowerCase();
+  const minPrice = Number(document.getElementById('filterMinPrice').value || 0);
+  const maxPrice = Number(document.getElementById('filterMaxPrice').value || 9999999999);
+  const city = document.getElementById('filterCity').value;
+  const type = document.getElementById('filterType').value;
+  const sort = document.getElementById('filterSort').value;
+
+  let arr = state.market.filter(p => {
+    const matchesSearch = !search || `${p.type} ${p.area}`.toLowerCase().includes(search);
+    const matchesPrice = p.price >= minPrice && p.price <= maxPrice;
+    const matchesCity = !city || p.area === city;
+    const matchesType = !type || typeLabel(p.type) === type;
+    return matchesSearch && matchesPrice && matchesCity && matchesType;
+  });
+
+  if (sort === 'priceAsc') arr.sort((a,b) => a.price - b.price);
+  if (sort === 'priceDesc') arr.sort((a,b) => b.price - a.price);
+  if (sort === 'rentDesc') arr.sort((a,b) => b.rent - a.rent);
+  if (sort === 'yieldDesc') arr.sort((a,b) => getYield(b) - getYield(a));
+  return arr;
+}
+
+function renderOwnedCards() {
+  const el = document.getElementById('ownedCards');
+  if (!state.owned.length) {
+    el.innerHTML = '<div class="empty">עדיין אין לך נכסים. עבור לשוק כדי לקנות את העסקה הראשונה שלך.</div>';
+    return;
+  }
+  el.innerHTML = state.owned.slice(0, 4).map(p => `
+    <div class="property-card">
+      <div class="property-art ${p.art}">${p.icon}</div>
+      <div class="property-body">
+        <div class="property-name">${p.type}</div>
+        <div class="property-city">${p.area}</div>
+        <div class="property-big">${fmt(p.price)}</div>
+        <div class="property-rent">שכירות: ${fmt(p.rent)} / חודש</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMarket() {
+  populateFilterOptions();
+  const arr = filteredMarket();
+  const el = document.getElementById('marketGrid');
+  document.getElementById('marketStats').textContent = `נמצאו ${arr.length} נכסים`;
+
+  if (!arr.length) {
+    el.innerHTML = '<div class="empty">לא נמצאו נכסים לפי הסינון שבחרת.</div>';
+    return;
+  }
+
+  el.innerHTML = arr.map(p => `
+    <div class="detail-card">
+      <div class="property-art ${p.art}">${p.icon}</div>
+      <div class="detail-body">
+        <div class="detail-title">${p.type}</div>
+        <div class="detail-sub">${p.area} · ${typeLabel(p.type)}</div>
+        <div class="meta-grid">
+          <div>מחיר</div><div><b>${fmt(p.price)}</b></div>
+          <div>שכירות</div><div><b>${fmt(p.rent)} / חודש</b></div>
+          <div>הוצאות</div><div>${fmt(p.expenses)} / חודש</div>
+          <div>תשואה נטו משוערת</div><div><b>${getYield(p).toFixed(1)}%</b></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-orange btn-small" onclick="buyProperty(${p.id})">קנה עכשיו</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPortfolio() {
+  const el = document.getElementById('portfolioGrid');
+  document.getElementById('portfolioStats').textContent = `${state.owned.length} נכסים`;
+  if (!state.owned.length) {
+    el.innerHTML = '<div class="empty">עדיין אין נכסים בתיק ההשקעות שלך.</div>';
+    return;
+  }
+  el.innerHTML = state.owned.map(p => {
+    const gain = p.price - p.purchasePrice;
+    const gainClass = gain >= 0 ? 'positive' : 'negative';
+    return `
+      <div class="detail-card">
+        <div class="property-art ${p.art}">${p.icon}</div>
+        <div class="detail-body">
+          <div class="detail-title">${p.type}</div>
+          <div class="detail-sub">${p.area}</div>
+          <div class="meta-grid">
+            <div>שווי נוכחי</div><div><b>${fmt(p.price)}</b></div>
+            <div>מחיר רכישה</div><div>${fmt(p.purchasePrice)}</div>
+            <div>שכירות</div><div>${fmt(p.rent)} / חודש</div>
+            <div>הוצאות</div><div>${fmt(p.expenses)} / חודש</div>
+            <div>חודשים בבעלות</div><div>${p.monthsOwned}</div>
+            <div>שינוי ערך</div><div class="${gainClass}">${fmt(gain)}</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-gray btn-small" onclick="sellProperty(${p.id})">מכור נכס</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderBank() {
+  const assets = state.owned.reduce((s,p) => s + p.price, 0);
+  const netWorth = state.cash + assets - state.bankDebt;
+  const monthlyPay = monthlyBankPayment();
+  const debtRatio = assets > 0 ? Math.min(1, state.bankDebt / assets) : (state.bankDebt > 0 ? 1 : 0);
+  const creditScore = Math.max(300, Math.min(850, Math.round(850 - debtRatio * 420 + Math.min(state.cash / 10000, 60))));
+  const status = creditScore >= 720 ? 'Good' : creditScore >= 600 ? 'Medium' : 'Low';
+
+  document.getElementById('bankCash').textContent = fmt(state.cash);
+  document.getElementById('bankNetWorth').textContent = fmt(netWorth);
+  document.getElementById('bankPayment').textContent = fmt(monthlyPay);
+  document.getElementById('bankDebt').textContent = fmt(state.bankDebt);
+  document.getElementById('creditScoreValue').textContent = creditScore;
+  document.getElementById('creditStatus').textContent = status;
+  document.getElementById('debtRatioText').textContent = `${Math.round(debtRatio * 100)}%`;
+  document.getElementById('activeLoansText').textContent = state.bankDebt > 0 ? '1' : '0';
+  document.getElementById('maxLoanText').textContent = fmt(creditScore >= 700 ? 1000000 : creditScore >= 600 ? 500000 : 250000);
+  document.getElementById('creditScoreFraction').textContent = `850 / ${creditScore}`;
+  document.getElementById('creditScoreBar').style.width = `${((creditScore - 300) / 550) * 100}%`;
+
+  const offersEl = document.getElementById('loanOffers');
+  offersEl.innerHTML = loanOffers.map(offer => `
+    <div class="loan-offer">
+      <div class="loan-offer-title">${fmt(offer.amount)}</div>
+      <div class="meta-grid">
+        <div>תקופה</div><div>${offer.months} חודשים</div>
+        <div>ריבית</div><div>6% שנתי</div>
+        <div>תשלום חודשי משוער</div><div><b>${fmt(monthlyBankPaymentFor(offer.amount, offer.months))}</b></div>
+        <div>סוג</div><div>${offer.amount >= 500000 ? 'משכנתא עסקית' : 'הלוואה'}</div>
+      </div>
+      <button class="btn-blue btn-small" onclick="takeLoan(${offer.amount}, ${offer.months})">קח הלוואה</button>
+    </div>
+  `).join('');
+}
+
+function renderAuctions() {
+  const el = document.getElementById('auctionGrid');
+  if (!state.auctions.length) {
+    el.innerHTML = '<div class="empty">אין כרגע מכרזים.</div>';
+  } else {
+    el.innerHTML = state.auctions.map(a => `
+      <div class="auction-card">
+        <div class="tag orange">מכרז חם</div>
+        <div class="property-art ${a.art}" style="height:125px;">${a.icon}</div>
+        <div style="margin-top:12px; font-size:19px; font-weight:900;">${a.type}</div>
+        <div style="color:#64748b; margin:5px 0 12px;">${a.area}</div>
+        <div class="meta-grid">
+          <div>הצעה נוכחית</div><div><b>${fmt(a.openingBid)}</b></div>
+          <div>שווי שוק</div><div>${fmt(a.price)}</div>
+          <div>זמן נותר</div><div>${a.daysLeft} ימים</div>
+          <div>הצעות</div><div>${a.bids}</div>
+        </div>
+        <button class="btn-orange btn-small" onclick="bidAuction(${a.id})">הגש הצעה</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('auctionViewed').textContent = state.auctionViewed;
+  document.getElementById('auctionBids').textContent = state.auctionBids;
+  document.getElementById('auctionWinRate').textContent = state.auctionBids ? `${Math.round((state.auctionWins / state.auctionBids) * 100)}%` : '0%';
+  document.getElementById('auctionTotalBids').textContent = fmt(state.auctionTotalBids);
+  document.getElementById('auctionWins').textContent = state.auctionWins;
+}
+
+function renderMissions() {
+  const assets = state.owned.reduce((s,p) => s + p.price, 0);
+  const netWorth = state.cash + assets - state.bankDebt;
+  const monthlyRent = state.owned.reduce((s,p) => s + p.rent, 0);
+  const uniqueCities = new Set(state.owned.map(p => p.area)).size;
+
+  const missions = [
+    {title:'High Roller', desc:'הגע להכנסה חודשית של ₪10,000', progress: Math.min(monthlyRent / 10000, 1), reward:'₪50,000'},
+    {title:'Multi-Millionaire', desc:'הגע לשווי נקי של ₪1,000,000', progress: Math.min(netWorth / 1000000, 1), reward:'₪150,000'},
+    {title:'Global Investor', desc:'החזק נכסים ב-3 ערים שונות', progress: Math.min(uniqueCities / 3, 1), reward:'₪75,000'},
+    {title:'Debt Cleaner', desc:'החזר את כל החוב לבנק', progress: state.bankDebt === 0 ? 1 : Math.max(0, 1 - state.bankDebt / 500000), reward:'₪30,000'},
+    {title:'Property Master', desc:'החזק 5 נכסים במקביל', progress: Math.min(state.owned.length / 5, 1), reward:'₪90,000'},
+    {title:'Auction Master', desc:'זכה ב-3 מכרזים', progress: Math.min(state.auctionWins / 3, 1), reward:'₪60,000'}
+  ];
+
+  document.getElementById('missionGrid').innerHTML = missions.map(m => `
+    <div class="mission-card">
+      <div class="tag ${m.progress >= 1 ? 'blue' : 'orange'}">${m.progress >= 1 ? 'הושלמה' : 'פעילה'}</div>
+      <div class="mission-title">${m.title}</div>
+      <div class="mission-desc">${m.desc}</div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span>${Math.round(m.progress * 100)}%</span>
+        <span>תגמול: ${m.reward}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${m.progress * 100}%"></div></div>
+    </div>
+  `).join('');
+}
+
+function renderTop() {
+  const assets = state.owned.reduce((s,p) => s + p.price, 0);
+  const netWorth = state.cash + assets - state.bankDebt;
+  const monthlyRent = state.owned.reduce((s,p) => s + p.rent, 0);
+
+  document.getElementById('cash').textContent = fmt(state.cash);
+  document.getElementById('netWorth').textContent = fmt(netWorth);
+  document.getElementById('assets').textContent = fmt(assets);
+  document.getElementById('debt').textContent = fmt(state.bankDebt);
+  document.getElementById('rentalIncomeTop').textContent = fmt(monthlyRent);
+  document.getElementById('ownedCount').textContent = state.owned.length;
+  document.getElementById('month').textContent = state.month;
+  document.getElementById('bankPaymentQuick').textContent = fmt(monthlyBankPayment());
+  document.getElementById('rentalIncomeBig').textContent = fmt(monthlyRent);
+  document.getElementById('sideCash').textContent = fmt(state.cash);
+  document.getElementById('sideMonth').textContent = state.month;
+}
+
+function render() {
+  renderTop();
+  renderOwnedCards();
+  renderMarket();
+  renderPortfolio();
+  renderBank();
+  renderAuctions();
+  renderMissions();
+}
+
+render();
+showPage(state.currentPage || 'overview');
+</script>
+</body>
+</html>
