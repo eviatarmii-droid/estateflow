@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EstateFlow v8.8 - Hebrew Economy Missions</title>
+<title>EstateFlow v8.9 - Claim Mission Rewards</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -1073,9 +1073,11 @@ let state = loadGame() || {
   auctionBids: 0,
   auctionWins: 0,
   auctionTotalBids: 0,
-  auctions: []
+  auctions: [],
+  claimedMissions: []
 };
 
+if (!Array.isArray(state.claimedMissions)) state.claimedMissions = [];
 if (state.boiRate === undefined) state.boiRate = 0.035;
 if (state.inflationRate === undefined) state.inflationRate = 0.016;
 if (state.bankLoanRate === undefined) state.bankLoanRate = 0.055;
@@ -1490,7 +1492,8 @@ function resetGame() {
     auctionBids: 0,
     auctionWins: 0,
     auctionTotalBids: 0,
-    auctions: []
+    auctions: [],
+    claimedMissions: []
   };
   generateMarket();
   generateAuctions();
@@ -1739,6 +1742,56 @@ function renderAuctions() {
   document.getElementById('auctionWins').textContent = state.auctionWins;
 }
 
+
+function claimMissionReward(id, amount) {
+  if (!Array.isArray(state.claimedMissions)) state.claimedMissions = [];
+  if (state.claimedMissions.includes(id)) return;
+
+  const mission = getMissionById(id);
+  if (!mission || mission.progress < 1) return;
+
+  state.cash += amount;
+  state.claimedMissions.push(id);
+  setMessage(`קיבלת פרס משימה בסך ${fmt(amount)}.`);
+  saveGame();
+  render();
+}
+
+function getMissionById(id) {
+  const assets = state.owned.reduce((s,p) => s + p.price, 0);
+  const netWorth = state.cash + assets - state.bankDebt;
+  const monthlyIncome = state.owned.reduce((s,p) => s + p.rent, 0);
+  const monthlyExpenses = state.owned.reduce((s,p) => s + p.expenses, 0);
+  const netPropertyIncome = Math.max(0, monthlyIncome - monthlyExpenses);
+  const uniqueCities = new Set(state.owned.map(p => p.area)).size;
+  const sectors = new Set(state.owned.map(p => p.sector || 'residential')).size;
+  const commercialCount = state.owned.filter(p => p.sector === 'commercial').length;
+  const hotelCount = state.owned.filter(p => p.sector === 'hotel').length;
+  const residentialCount = state.owned.filter(p => p.sector === 'residential').length;
+  const debtRatio = assets > 0 ? state.bankDebt / assets : (state.bankDebt > 0 ? 1 : 0);
+  const cashReserveTarget = Math.max(100000, monthlyExpenses * 6 + monthlyBankPayment() * 6);
+
+  const map = {
+    investor_beginner: {progress: Math.min(state.owned.length / 1, 1)},
+    portfolio_builder: {progress: Math.min(state.owned.length / 5, 1)},
+    gross_income: {progress: Math.min(monthlyIncome / 10000, 1)},
+    net_cashflow: {progress: Math.min(netPropertyIncome / 15000, 1)},
+    millionaire: {progress: Math.min(netWorth / 1000000, 1)},
+    five_million: {progress: Math.min(netWorth / 5000000, 1)},
+    geographic_diversification: {progress: Math.min(uniqueCities / 3, 1)},
+    sector_diversification: {progress: Math.min(sectors / 3, 1)},
+    residential_investor: {progress: Math.min(residentialCount / 3, 1)},
+    commercial_investor: {progress: Math.min(commercialCount / 2, 1)},
+    hotel_entry: {progress: Math.min(hotelCount / 1, 1)},
+    responsible_debt: {progress: assets > 0 ? Math.min(1, 0.30 / Math.max(debtRatio, 0.0001)) : 0},
+    debt_free: {progress: state.bankDebt === 0 ? 1 : Math.max(0, 1 - state.bankDebt / 1000000)},
+    safety_buffer: {progress: Math.min(state.cash / cashReserveTarget, 1)},
+    auction_master: {progress: Math.min(state.auctionWins / 3, 1)}
+  };
+
+  return map[id] || null;
+}
+
 function renderMissions() {
   const assets = state.owned.reduce((s,p) => s + p.price, 0);
   const netWorth = state.cash + assets - state.bankDebt;
@@ -1754,110 +1807,50 @@ function renderMissions() {
   const cashReserveTarget = Math.max(100000, monthlyExpenses * 6 + monthlyBankPayment() * 6);
 
   const missions = [
-    {
-      title:'משקיע מתחיל',
-      desc:'החזק נכס אחד לפחות',
-      progress: Math.min(state.owned.length / 1, 1),
-      reward:'₪15,000'
-    },
-    {
-      title:'בונה תיק נכסים',
-      desc:'החזק 5 נכסים במקביל',
-      progress: Math.min(state.owned.length / 5, 1),
-      reward:'₪90,000'
-    },
-    {
-      title:'הכנסה מניבה',
-      desc:'הגע להכנסה חודשית ברוטו של ₪10,000 מנכסים',
-      progress: Math.min(monthlyIncome / 10000, 1),
-      reward:'₪50,000'
-    },
-    {
-      title:'תזרים חזק',
-      desc:'הגע להכנסה חודשית נטו של ₪15,000 אחרי הוצאות הנכסים',
-      progress: Math.min(netPropertyIncome / 15000, 1),
-      reward:'₪80,000'
-    },
-    {
-      title:'מיליונר',
-      desc:'הגע לשווי נקי של ₪1,000,000',
-      progress: Math.min(netWorth / 1000000, 1),
-      reward:'₪150,000'
-    },
-    {
-      title:'חמישה מיליון',
-      desc:'הגע לשווי נקי של ₪5,000,000',
-      progress: Math.min(netWorth / 5000000, 1),
-      reward:'₪300,000'
-    },
-    {
-      title:'פיזור גיאוגרפי',
-      desc:'החזק נכסים ב-3 ערים שונות',
-      progress: Math.min(uniqueCities / 3, 1),
-      reward:'₪75,000'
-    },
-    {
-      title:'פיזור השקעות',
-      desc:'החזק נכסים ב-3 סוגי השקעה שונים',
-      progress: Math.min(sectors / 3, 1),
-      reward:'₪100,000'
-    },
-    {
-      title:'משקיע מגורים',
-      desc:'החזק 3 נכסי מגורים',
-      progress: Math.min(residentialCount / 3, 1),
-      reward:'₪60,000'
-    },
-    {
-      title:'משקיע מסחרי',
-      desc:'החזק 2 נכסים מסחריים',
-      progress: Math.min(commercialCount / 2, 1),
-      reward:'₪100,000'
-    },
-    {
-      title:'כניסה למלונאות',
-      desc:'החזק לפחות בית מלון אחד',
-      progress: Math.min(hotelCount / 1, 1),
-      reward:'₪175,000'
-    },
-    {
-      title:'ניהול חוב אחראי',
-      desc:'שמור על יחס חוב לנכסים של 30% ומטה',
-      progress: assets > 0 ? Math.min(1, 0.30 / Math.max(debtRatio, 0.0001)) : 0,
-      reward:'₪70,000'
-    },
-    {
-      title:'ללא חובות',
-      desc:'החזר את כל החוב לבנק',
-      progress: state.bankDebt === 0 ? 1 : Math.max(0, 1 - state.bankDebt / 1000000),
-      reward:'₪30,000'
-    },
-    {
-      title:'כרית ביטחון',
-      desc:`החזק מזומן בגובה 6 חודשי הוצאות והחזרי חוב לפחות (${fmt(cashReserveTarget)})`,
-      progress: Math.min(state.cash / cashReserveTarget, 1),
-      reward:'₪85,000'
-    },
-    {
-      title:'מאסטר המכרזים',
-      desc:'זכה ב-3 מכרזים',
-      progress: Math.min(state.auctionWins / 3, 1),
-      reward:'₪60,000'
-    }
+    {id:'investor_beginner', title:'משקיע מתחיל', desc:'החזק נכס אחד לפחות', progress:Math.min(state.owned.length / 1, 1), reward:15000},
+    {id:'portfolio_builder', title:'בונה תיק נכסים', desc:'החזק 5 נכסים במקביל', progress:Math.min(state.owned.length / 5, 1), reward:90000},
+    {id:'gross_income', title:'הכנסה מניבה', desc:'הגע להכנסה חודשית ברוטו של ₪10,000 מנכסים', progress:Math.min(monthlyIncome / 10000, 1), reward:50000},
+    {id:'net_cashflow', title:'תזרים חזק', desc:'הגע להכנסה חודשית נטו של ₪15,000 אחרי הוצאות הנכסים', progress:Math.min(netPropertyIncome / 15000, 1), reward:80000},
+    {id:'millionaire', title:'מיליונר', desc:'הגע לשווי נקי של ₪1,000,000', progress:Math.min(netWorth / 1000000, 1), reward:150000},
+    {id:'five_million', title:'חמישה מיליון', desc:'הגע לשווי נקי של ₪5,000,000', progress:Math.min(netWorth / 5000000, 1), reward:300000},
+    {id:'geographic_diversification', title:'פיזור גיאוגרפי', desc:'החזק נכסים ב-3 ערים שונות', progress:Math.min(uniqueCities / 3, 1), reward:75000},
+    {id:'sector_diversification', title:'פיזור השקעות', desc:'החזק נכסים ב-3 סוגי השקעה שונים', progress:Math.min(sectors / 3, 1), reward:100000},
+    {id:'residential_investor', title:'משקיע מגורים', desc:'החזק 3 נכסי מגורים', progress:Math.min(residentialCount / 3, 1), reward:60000},
+    {id:'commercial_investor', title:'משקיע מסחרי', desc:'החזק 2 נכסים מסחריים', progress:Math.min(commercialCount / 2, 1), reward:100000},
+    {id:'hotel_entry', title:'כניסה למלונאות', desc:'החזק לפחות בית מלון אחד', progress:Math.min(hotelCount / 1, 1), reward:175000},
+    {id:'responsible_debt', title:'ניהול חוב אחראי', desc:'שמור על יחס חוב לנכסים של 30% ומטה', progress:assets > 0 ? Math.min(1, 0.30 / Math.max(debtRatio, 0.0001)) : 0, reward:70000},
+    {id:'debt_free', title:'ללא חובות', desc:'החזר את כל החוב לבנק', progress:state.bankDebt === 0 ? 1 : Math.max(0, 1 - state.bankDebt / 1000000), reward:30000},
+    {id:'safety_buffer', title:'כרית ביטחון', desc:`החזק מזומן בגובה 6 חודשי הוצאות והחזרי חוב לפחות (${fmt(cashReserveTarget)})`, progress:Math.min(state.cash / cashReserveTarget, 1), reward:85000},
+    {id:'auction_master', title:'מאסטר המכרזים', desc:'זכה ב-3 מכרזים', progress:Math.min(state.auctionWins / 3, 1), reward:60000}
   ];
 
-  document.getElementById('missionGrid').innerHTML = missions.map(m => `
-    <div class="mission-card">
-      <div class="tag ${m.progress >= 1 ? 'blue' : 'orange'}">${m.progress >= 1 ? 'הושלמה' : 'פעילה'}</div>
-      <div class="mission-title">${m.title}</div>
-      <div class="mission-desc">${m.desc}</div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-        <span>${Math.round(m.progress * 100)}%</span>
-        <span>תגמול: ${m.reward}</span>
+  if (!Array.isArray(state.claimedMissions)) state.claimedMissions = [];
+
+  document.getElementById('missionGrid').innerHTML = missions.map(m => {
+    const completed = m.progress >= 1;
+    const claimed = state.claimedMissions.includes(m.id);
+
+    let action = '';
+    if (completed && !claimed) {
+      action = `<button class="btn-blue btn-small" style="margin-top:12px;" onclick="claimMissionReward('${m.id}', ${m.reward})">קח פרס</button>`;
+    } else if (claimed) {
+      action = `<div style="margin-top:12px; color:#16a34a; font-weight:900;">✓ הפרס נלקח</div>`;
+    }
+
+    return `
+      <div class="mission-card">
+        <div class="tag ${completed ? 'blue' : 'orange'}">${claimed ? 'הפרס נלקח' : completed ? 'הושלמה' : 'פעילה'}</div>
+        <div class="mission-title">${m.title}</div>
+        <div class="mission-desc">${m.desc}</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span>${Math.round(Math.min(1, m.progress) * 100)}%</span>
+          <span>תגמול: ${fmt(m.reward)}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, m.progress * 100)}%"></div></div>
+        ${action}
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, m.progress * 100)}%"></div></div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderTop() {
