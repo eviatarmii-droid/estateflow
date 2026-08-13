@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EstateFlow v8.7 - 18 Property Market Fix</title>
+<title>EstateFlow v8.8 - Hebrew Economy Missions</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -1742,16 +1742,108 @@ function renderAuctions() {
 function renderMissions() {
   const assets = state.owned.reduce((s,p) => s + p.price, 0);
   const netWorth = state.cash + assets - state.bankDebt;
-  const monthlyRent = state.owned.reduce((s,p) => s + p.rent, 0);
+  const monthlyIncome = state.owned.reduce((s,p) => s + p.rent, 0);
+  const monthlyExpenses = state.owned.reduce((s,p) => s + p.expenses, 0);
+  const netPropertyIncome = Math.max(0, monthlyIncome - monthlyExpenses);
   const uniqueCities = new Set(state.owned.map(p => p.area)).size;
+  const sectors = new Set(state.owned.map(p => p.sector || 'residential')).size;
+  const commercialCount = state.owned.filter(p => p.sector === 'commercial').length;
+  const hotelCount = state.owned.filter(p => p.sector === 'hotel').length;
+  const residentialCount = state.owned.filter(p => p.sector === 'residential').length;
+  const debtRatio = assets > 0 ? state.bankDebt / assets : (state.bankDebt > 0 ? 1 : 0);
+  const cashReserveTarget = Math.max(100000, monthlyExpenses * 6 + monthlyBankPayment() * 6);
 
   const missions = [
-    {title:'High Roller', desc:'הגע להכנסה חודשית של ₪10,000', progress: Math.min(monthlyRent / 10000, 1), reward:'₪50,000'},
-    {title:'Multi-Millionaire', desc:'הגע לשווי נקי של ₪1,000,000', progress: Math.min(netWorth / 1000000, 1), reward:'₪150,000'},
-    {title:'Global Investor', desc:'החזק נכסים ב-3 ערים שונות', progress: Math.min(uniqueCities / 3, 1), reward:'₪75,000'},
-    {title:'Debt Cleaner', desc:'החזר את כל החוב לבנק', progress: state.bankDebt === 0 ? 1 : Math.max(0, 1 - state.bankDebt / 500000), reward:'₪30,000'},
-    {title:'Property Master', desc:'החזק 5 נכסים במקביל', progress: Math.min(state.owned.length / 5, 1), reward:'₪90,000'},
-    {title:'Auction Master', desc:'זכה ב-3 מכרזים', progress: Math.min(state.auctionWins / 3, 1), reward:'₪60,000'}
+    {
+      title:'משקיע מתחיל',
+      desc:'החזק נכס אחד לפחות',
+      progress: Math.min(state.owned.length / 1, 1),
+      reward:'₪15,000'
+    },
+    {
+      title:'בונה תיק נכסים',
+      desc:'החזק 5 נכסים במקביל',
+      progress: Math.min(state.owned.length / 5, 1),
+      reward:'₪90,000'
+    },
+    {
+      title:'הכנסה מניבה',
+      desc:'הגע להכנסה חודשית ברוטו של ₪10,000 מנכסים',
+      progress: Math.min(monthlyIncome / 10000, 1),
+      reward:'₪50,000'
+    },
+    {
+      title:'תזרים חזק',
+      desc:'הגע להכנסה חודשית נטו של ₪15,000 אחרי הוצאות הנכסים',
+      progress: Math.min(netPropertyIncome / 15000, 1),
+      reward:'₪80,000'
+    },
+    {
+      title:'מיליונר',
+      desc:'הגע לשווי נקי של ₪1,000,000',
+      progress: Math.min(netWorth / 1000000, 1),
+      reward:'₪150,000'
+    },
+    {
+      title:'חמישה מיליון',
+      desc:'הגע לשווי נקי של ₪5,000,000',
+      progress: Math.min(netWorth / 5000000, 1),
+      reward:'₪300,000'
+    },
+    {
+      title:'פיזור גיאוגרפי',
+      desc:'החזק נכסים ב-3 ערים שונות',
+      progress: Math.min(uniqueCities / 3, 1),
+      reward:'₪75,000'
+    },
+    {
+      title:'פיזור השקעות',
+      desc:'החזק נכסים ב-3 סוגי השקעה שונים',
+      progress: Math.min(sectors / 3, 1),
+      reward:'₪100,000'
+    },
+    {
+      title:'משקיע מגורים',
+      desc:'החזק 3 נכסי מגורים',
+      progress: Math.min(residentialCount / 3, 1),
+      reward:'₪60,000'
+    },
+    {
+      title:'משקיע מסחרי',
+      desc:'החזק 2 נכסים מסחריים',
+      progress: Math.min(commercialCount / 2, 1),
+      reward:'₪100,000'
+    },
+    {
+      title:'כניסה למלונאות',
+      desc:'החזק לפחות בית מלון אחד',
+      progress: Math.min(hotelCount / 1, 1),
+      reward:'₪175,000'
+    },
+    {
+      title:'ניהול חוב אחראי',
+      desc:'שמור על יחס חוב לנכסים של 30% ומטה',
+      progress: assets > 0 ? Math.min(1, 0.30 / Math.max(debtRatio, 0.0001)) : 0,
+      reward:'₪70,000'
+    },
+    {
+      title:'ללא חובות',
+      desc:'החזר את כל החוב לבנק',
+      progress: state.bankDebt === 0 ? 1 : Math.max(0, 1 - state.bankDebt / 1000000),
+      reward:'₪30,000'
+    },
+    {
+      title:'כרית ביטחון',
+      desc:`החזק מזומן בגובה 6 חודשי הוצאות והחזרי חוב לפחות (${fmt(cashReserveTarget)})`,
+      progress: Math.min(state.cash / cashReserveTarget, 1),
+      reward:'₪85,000'
+    },
+    {
+      title:'מאסטר המכרזים',
+      desc:'זכה ב-3 מכרזים',
+      progress: Math.min(state.auctionWins / 3, 1),
+      reward:'₪60,000'
+    }
   ];
 
   document.getElementById('missionGrid').innerHTML = missions.map(m => `
@@ -1763,7 +1855,7 @@ function renderMissions() {
         <span>${Math.round(m.progress * 100)}%</span>
         <span>תגמול: ${m.reward}</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${m.progress * 100}%"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, m.progress * 100)}%"></div></div>
     </div>
   `).join('');
 }
