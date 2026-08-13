@@ -101,6 +101,35 @@
     flex: 1;
     padding: 24px;
   }
+  .global-account-bar {
+    background: #fff;
+    border: 1px solid #e7edf4;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    position: sticky;
+    top: 10px;
+    z-index: 20;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, .06);
+  }
+  .global-account-item {
+    min-width: 0;
+  }
+  .global-account-label {
+    color: #7b8794;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .global-account-value {
+    font-size: 18px;
+    font-weight: 900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .page { display: none; }
   .page.active { display: block; }
   .page-title-row {
@@ -431,6 +460,10 @@
     }
   }
   @media (max-width: 950px) {
+    .global-account-bar {
+      position: static;
+      grid-template-columns: repeat(2, 1fr);
+    }
     .app { display: block; }
     .sidebar {
       width: 100%;
@@ -455,6 +488,9 @@
     }
   }
   @media (max-width: 640px) {
+    .global-account-bar {
+      grid-template-columns: 1fr;
+    }
     .kpis, .filters-grid {
       grid-template-columns: 1fr;
     }
@@ -496,6 +532,29 @@
   </aside>
 
   <main class="main">
+
+    <div class="global-account-bar">
+      <div class="global-account-item">
+        <div class="global-account-label">יתרה</div>
+        <div class="global-account-value value-deep-orange" id="globalCash"></div>
+      </div>
+      <div class="global-account-item">
+        <div class="global-account-label">שווי כולל</div>
+        <div class="global-account-value value-orange" id="globalNetWorth"></div>
+      </div>
+      <div class="global-account-item">
+        <div class="global-account-label">שווי נכסים</div>
+        <div class="global-account-value value-blue" id="globalAssets"></div>
+      </div>
+      <div class="global-account-item">
+        <div class="global-account-label">חוב לבנק</div>
+        <div class="global-account-value value-gray" id="globalDebt"></div>
+      </div>
+      <div class="global-account-item">
+        <div class="global-account-label">שכירות חודשית</div>
+        <div class="global-account-value value-purple" id="globalRent"></div>
+      </div>
+    </div>
 
     <div id="page-overview" class="page active">
       <div class="page-title-row">
@@ -1305,6 +1364,12 @@ function renderTop() {
   document.getElementById('rentalIncomeBig').textContent = fmt(monthlyRent);
   document.getElementById('sideCash').textContent = fmt(state.cash);
   document.getElementById('sideMonth').textContent = state.month;
+
+  document.getElementById('globalCash').textContent = fmt(state.cash);
+  document.getElementById('globalNetWorth').textContent = fmt(netWorth);
+  document.getElementById('globalAssets').textContent = fmt(assets);
+  document.getElementById('globalDebt').textContent = fmt(state.bankDebt);
+  document.getElementById('globalRent').textContent = fmt(monthlyRent);
 }
 
 function render() {
@@ -1321,4 +1386,4 @@ render();
 showPage(state.currentPage || 'overview');
 </script>
 </body>
-</html> 
+</html>
