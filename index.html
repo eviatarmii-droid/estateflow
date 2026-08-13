@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EstateFlow v8.3 - Realistic Hotels</title>
+<title>EstateFlow v8.6 - Expanded Market & Fixed Filters</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -972,7 +972,27 @@ const propertyTemplates = [
   // מלונות — מוצגים כהשקעת נדל״ן מניב; ההכנסה היא נטו-תפעולית בקירוב לצורכי משחק
   {type:'מלון בוטיק', area:'אילת', price:[9000000,14500000], rent:[55000,95000], expenses:[22000,38000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.010},
   {type:'מלון עירוני', area:'ירושלים', price:[15000000,26000000], rent:[90000,160000], expenses:[36000,60000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008},
-  {type:'מלון נופש', area:'ים המלח', price:[20000000,35000000], rent:[125000,225000], expenses:[55000,95000], icon:'🏝️', art:'hotel', sector:'hotel', annualGrowth:0.010}
+  {type:'מלון נופש', area:'ים המלח', price:[20000000,35000000], rent:[125000,225000], expenses:[55000,95000], icon:'🏝️', art:'hotel', sector:'hotel', annualGrowth:0.010},
+
+  // נכסים נוספים לגיוון השוק
+  {type:'דירת גן', area:'ראשון לציון', price:[2400000,3400000], rent:[6500,8500], expenses:[500,750], icon:'🌿', art:'house', sector:'residential', annualGrowth:-0.007},
+  {type:'פנטהאוז', area:'תל אביב', price:[5200000,8500000], rent:[12500,18500], expenses:[900,1400], icon:'🌇', art:'house', sector:'residential', annualGrowth:-0.010},
+  {type:'פנטהאוז', area:'רמת גן', price:[3800000,5600000], rent:[9000,13500], expenses:[700,1100], icon:'🌆', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'דירת 4 חדרים', area:'נתניה', price:[2200000,3000000], rent:[5900,7600], expenses:[450,700], icon:'🏡', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'דירת 3 חדרים', area:'אשדוד', price:[1700000,2300000], rent:[4400,5800], expenses:[350,550], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.005},
+  {type:'דירת 3 חדרים', area:'ראשון לציון', price:[1900000,2550000], rent:[5000,6500], expenses:[380,600], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'דירת 3 חדרים', area:'רמת גן', price:[2450000,3350000], rent:[6200,8200], expenses:[450,700], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.007},
+  {type:'דירת 4 חדרים', area:'הרצליה', price:[3200000,4600000], rent:[7800,10800], expenses:[600,900], icon:'🏡', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'דירת 3 חדרים', area:'חולון', price:[1800000,2450000], rent:[4800,6300], expenses:[380,600], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'משרד בינוני', area:'רמת גן', price:[2200000,3600000], rent:[13000,21000], expenses:[1500,2400], icon:'🏢', art:'office', sector:'commercial', annualGrowth:0.004},
+  {type:'משרד יוקרתי', area:'תל אביב', price:[3800000,6500000], rent:[22000,38000], expenses:[2600,4300], icon:'🏙️', art:'office', sector:'commercial', annualGrowth:0.003},
+  {type:'חנות רחוב', area:'תל אביב', price:[2800000,4800000], rent:[16000,28000], expenses:[1800,3000], icon:'🛍️', art:'store', sector:'commercial', annualGrowth:0.004},
+  {type:'חנות רחוב', area:'ירושלים', price:[2200000,3900000], rent:[13000,23000], expenses:[1500,2600], icon:'🛍️', art:'store', sector:'commercial', annualGrowth:0.004},
+  {type:'מרכז לוגיסטי', area:'מודיעין', price:[4500000,7500000], rent:[28000,46000], expenses:[3200,5200], icon:'🚚', art:'warehouse', sector:'commercial', annualGrowth:0.007},
+  {type:'מחסן לוגיסטי', area:'ראשון לציון', price:[2200000,3400000], rent:[13000,21000], expenses:[1400,2300], icon:'📦', art:'warehouse', sector:'commercial', annualGrowth:0.006},
+  {type:'מלון בוטיק', area:'תל אביב', price:[18000000,30000000], rent:[105000,180000], expenses:[42000,70000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008},
+  {type:'מלון בוטיק', area:'חיפה', price:[11000000,18000000], rent:[65000,110000], expenses:[27000,45000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008},
+  {type:'מלון עסקים', area:'תל אביב', price:[24000000,42000000], rent:[145000,260000], expenses:[60000,105000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008}
 ];
 
 const loanOffers = [
@@ -1069,6 +1089,11 @@ navButtons.forEach(btn => {
     showPage(btn.dataset.page);
   });
 });
+
+document.getElementById('filterCity').addEventListener('change', renderMarket);
+document.getElementById('filterType').addEventListener('change', renderMarket);
+document.getElementById('filterSort').addEventListener('change', renderMarket);
+
 
 
 const OWNER_PIN = '1994';
@@ -1197,7 +1222,7 @@ function generateMarket() {
   if (state.month === 1) {
     starter.slice(0,3).forEach((t, i) => state.market.push(makeProperty(t, i)));
   }
-  while (state.market.length < 9) {
+  while (state.market.length < 18) {
     const t = propertyTemplates[rand(0, propertyTemplates.length - 1)];
     state.market.push(makeProperty(t, state.market.length));
   }
@@ -1508,11 +1533,19 @@ function populateFilterOptions() {
   const citySel = document.getElementById('filterCity');
   const typeSel = document.getElementById('filterType');
 
-  const cities = [...new Set(state.market.map(p => p.area))];
-  const types = [...new Set(state.market.map(p => typeLabel(p.type)))];
+  // שומרים את הבחירה הנוכחית כדי שהסינון לא יתאפס בכל רינדור
+  const selectedCity = citySel.value;
+  const selectedType = typeSel.value;
+
+  const cities = [...new Set(state.market.map(p => p.area))].sort((a,b) => a.localeCompare(b, 'he'));
+  const types = [...new Set(state.market.map(p => typeLabel(p.type)))].sort((a,b) => a.localeCompare(b, 'he'));
 
   citySel.innerHTML = '<option value="">כל הערים</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
   typeSel.innerHTML = '<option value="">כל הסוגים</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+
+  // מחזירים את הבחירה אם היא עדיין קיימת
+  if (cities.includes(selectedCity)) citySel.value = selectedCity;
+  if (types.includes(selectedType)) typeSel.value = selectedType;
 }
 
 function filteredMarket() {
@@ -1562,7 +1595,12 @@ function renderMarket() {
   populateFilterOptions();
   const arr = filteredMarket();
   const el = document.getElementById('marketGrid');
-  document.getElementById('marketStats').textContent = `נמצאו ${arr.length} נכסים`;
+  const city = document.getElementById('filterCity').value;
+  const type = document.getElementById('filterType').value;
+  const context = [city, type].filter(Boolean).join(' · ');
+  document.getElementById('marketStats').textContent = context
+    ? `נמצאו ${arr.length} נכסים — ${context}`
+    : `נמצאו ${arr.length} נכסים`;
 
   if (!arr.length) {
     el.innerHTML = '<div class="empty">לא נמצאו נכסים לפי הסינון שבחרת.</div>';
