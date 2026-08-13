@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EstateFlow v7</title>
+<title>EstateFlow v8 - Realistic Israel Economy</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -507,7 +507,7 @@
   <aside class="sidebar">
     <div class="logo">
       <h1><span class="blue">Estate</span><span class="orange">Flow</span></h1>
-      <small>כלכלה, נדל״ן והשקעות</small>
+      <small>כלכלה ונדל״ן בישראל — מודל 2026</small>
     </div>
 
     <div class="side-search">
@@ -582,6 +582,31 @@
 
       <div class="message" id="message">ברוך הבא! יש לך ₪250,000. קנה נכסים במזומן, ואם חסר כסף אפשר לקחת הלוואה מהבנק.</div>
 
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">מצב הכלכלה — ישראל 2026</h2>
+        </div>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <div class="mini-stat-label">ריבית בנק ישראל</div>
+            <div class="mini-stat-value value-blue">3.5%</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">אינפלציה שנתית</div>
+            <div class="mini-stat-value">1.6%</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">מגמת מחירי דיור</div>
+            <div class="mini-stat-value negative">−1.3% שנתי</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">מגמת שכירות</div>
+            <div class="mini-stat-value value-green">≈4% שנתי</div>
+          </div>
+        </div>
+      </div>
+
       <div class="overview-grid">
         <div class="panel">
           <div class="panel-header">
@@ -621,7 +646,7 @@
       <div class="page-title-row">
         <div>
           <h1 class="page-title">שוק הנדל״ן</h1>
-          <div class="page-subtitle">חפש עסקאות, סנן נכסים וקנה את ההזדמנות הבאה שלך</div>
+          <div class="page-subtitle">חפש עסקאות, סנן נכסים וקנה את ההזדמנות הבאה שלך — המחירים מכוילים בקירוב לישראל 2026</div>
         </div>
       </div>
 
@@ -811,20 +836,32 @@ const fmt = n => new Intl.NumberFormat('he-IL', {
 }).format(Math.round(n));
 
 const propertyTemplates = [
-  {type:'דירת סטודיו', area:'באר שבע', price:[420000,560000], rent:[2200,2900], expenses:[280,420], icon:'🏠', art:'house'},
-  {type:'דירת 2 חדרים', area:'חיפה', price:[500000,650000], rent:[2500,3300], expenses:[330,500], icon:'🏘️', art:'house'},
-  {type:'דירת 3 חדרים', area:'באר שבע', price:[650000,850000], rent:[3000,3900], expenses:[400,650], icon:'🏘️', art:'house'},
-  {type:'דירת 4 חדרים', area:'פתח תקווה', price:[1100000,1450000], rent:[4700,6200], expenses:[650,900], icon:'🏡', art:'house'},
-  {type:'משרד קטן', area:'ראשון לציון', price:[780000,1050000], rent:[4800,6500], expenses:[700,1100], icon:'🏢', art:'office'},
-  {type:'חנות', area:'נתניה', price:[700000,1000000], rent:[4500,6500], expenses:[650,1000], icon:'🏪', art:'store'},
-  {type:'מחסן מסחרי', area:'אשדוד', price:[500000,780000], rent:[3500,5200], expenses:[450,750], icon:'🏭', art:'warehouse'},
-  {type:'בניין משרדים', area:'תל אביב', price:[1800000,2800000], rent:[9000,16000], expenses:[1200,1900], icon:'🏙️', art:'office'},
-  {type:'מרכז מסחרי', area:'ירושלים', price:[2200000,3600000], rent:[12000,22000], expenses:[1500,2400], icon:'🏬', art:'store'},
-  {type:'מסחר שכונתי', area:'רמת גן', price:[950000,1450000], rent:[6500,9500], expenses:[850,1350], icon:'🛍️', art:'store'},
-  {type:'קומת מסחר', area:'תל אביב', price:[1600000,2400000], rent:[10000,16000], expenses:[1300,2000], icon:'🏬', art:'store'},
-  {type:'מלון בוטיק', area:'אילת', price:[2200000,3400000], rent:[15000,24000], expenses:[3000,4800], icon:'🏨', art:'hotel'},
-  {type:'מלון עירוני', area:'ירושלים', price:[3200000,4800000], rent:[22000,34000], expenses:[4200,6500], icon:'🏨', art:'hotel'},
-  {type:'מלון נופש', area:'ים המלח', price:[4200000,6500000], rent:[30000,48000], expenses:[6500,9500], icon:'🏝️', art:'hotel'}
+  // מגורים — טווחי משחק שמכוילים בקירוב לרמות מחירים בישראל ב-2026
+  {type:'דירת 2 חדרים', area:'באר שבע', price:[850000,1150000], rent:[2600,3400], expenses:[250,420], icon:'🏠', art:'house', sector:'residential', annualGrowth:-0.005},
+  {type:'דירת 3 חדרים', area:'באר שבע', price:[1100000,1450000], rent:[3200,4100], expenses:[300,500], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.005},
+  {type:'דירת 2 חדרים', area:'חיפה', price:[1150000,1550000], rent:[3300,4300], expenses:[300,480], icon:'🏠', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'דירת 3 חדרים', area:'חיפה', price:[1450000,1950000], rent:[3900,5200], expenses:[350,550], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.006},
+  {type:'דירת 3 חדרים', area:'פתח תקווה', price:[1900000,2450000], rent:[5200,6500], expenses:[420,650], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.010},
+  {type:'דירת 4 חדרים', area:'פתח תקווה', price:[2350000,3100000], rent:[6200,7900], expenses:[500,750], icon:'🏡', art:'house', sector:'residential', annualGrowth:-0.010},
+  {type:'דירת 3 חדרים', area:'ירושלים', price:[2300000,3150000], rent:[5600,7600], expenses:[450,700], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.004},
+  {type:'דירת 4 חדרים', area:'ירושלים', price:[3000000,4100000], rent:[7000,9300], expenses:[550,850], icon:'🏡', art:'house', sector:'residential', annualGrowth:-0.004},
+  {type:'דירת 2 חדרים', area:'תל אביב', price:[2600000,3500000], rent:[6500,8500], expenses:[500,800], icon:'🏠', art:'house', sector:'residential', annualGrowth:-0.012},
+  {type:'דירת 3 חדרים', area:'תל אביב', price:[3400000,4700000], rent:[8200,11500], expenses:[650,1000], icon:'🏘️', art:'house', sector:'residential', annualGrowth:-0.012},
+
+  // מסחרי / משרדים — תשואה שוטפת גבוהה יותר וסיכון/תנודתיות גבוהים יותר
+  {type:'חנות שכונתית', area:'באר שבע', price:[900000,1450000], rent:[5500,8500], expenses:[700,1200], icon:'🏪', art:'store', sector:'commercial', annualGrowth:0.005},
+  {type:'חנות', area:'חיפה', price:[1200000,1900000], rent:[7000,11000], expenses:[850,1400], icon:'🏪', art:'store', sector:'commercial', annualGrowth:0.004},
+  {type:'מסחר שכונתי', area:'רמת גן', price:[1700000,2600000], rent:[9500,15000], expenses:[1100,1750], icon:'🛍️', art:'store', sector:'commercial', annualGrowth:0.006},
+  {type:'משרד קטן', area:'ראשון לציון', price:[1300000,2100000], rent:[7500,12000], expenses:[900,1500], icon:'🏢', art:'office', sector:'commercial', annualGrowth:0.003},
+  {type:'קומת מסחר', area:'תל אביב', price:[3500000,5800000], rent:[19000,33000], expenses:[2200,3600], icon:'🏬', art:'store', sector:'commercial', annualGrowth:0.004},
+  {type:'בניין משרדים', area:'תל אביב', price:[7500000,13000000], rent:[42000,78000], expenses:[5500,9500], icon:'🏙️', art:'office', sector:'commercial', annualGrowth:0.003},
+  {type:'מרכז מסחרי', area:'ירושלים', price:[9000000,16000000], rent:[52000,95000], expenses:[7500,13000], icon:'🏬', art:'store', sector:'commercial', annualGrowth:0.004},
+  {type:'מחסן מסחרי', area:'אשדוד', price:[1400000,2300000], rent:[8500,13500], expenses:[800,1300], icon:'🏭', art:'warehouse', sector:'commercial', annualGrowth:0.006},
+
+  // מלונות — מוצגים כהשקעת נדל״ן מניב; ההכנסה היא נטו-תפעולית בקירוב לצורכי משחק
+  {type:'מלון בוטיק', area:'אילת', price:[8500000,13500000], rent:[52000,90000], expenses:[18000,32000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.010},
+  {type:'מלון עירוני', area:'ירושלים', price:[14000000,24000000], rent:[85000,150000], expenses:[30000,52000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008},
+  {type:'מלון נופש', area:'ים המלח', price:[18000000,32000000], rent:[115000,210000], expenses:[45000,80000], icon:'🏝️', art:'hotel', sector:'hotel', annualGrowth:0.010}
 ];
 
 const loanOffers = [
@@ -843,7 +880,9 @@ let state = loadGame() || {
   owned: [],
   market: [],
   bankDebt: 0,
-  bankLoanRate: 0.06,
+  bankLoanRate: 0.055,
+  boiRate: 0.035,
+  inflationRate: 0.016,
   bankLoanMonths: 60,
   currentPage: 'overview',
   auctionViewed: 0,
@@ -853,6 +892,9 @@ let state = loadGame() || {
   auctions: []
 };
 
+if (state.boiRate === undefined) state.boiRate = 0.035;
+if (state.inflationRate === undefined) state.inflationRate = 0.016;
+if (state.bankLoanRate === undefined) state.bankLoanRate = 0.055;
 if (!state.market.length) generateMarket();
 if (!state.auctions.length) generateAuctions();
 
@@ -893,13 +935,15 @@ function makeProperty(template, i=0) {
     expenses,
     icon: template.icon,
     art: template.art,
+    sector: template.sector || 'residential',
+    annualGrowth: template.annualGrowth ?? -0.013,
     monthsOwned: 0
   };
 }
 
 function generateMarket() {
   state.market = [];
-  const starter = propertyTemplates.filter(p => p.price[0] <= 650000);
+  const starter = propertyTemplates.filter(p => p.sector === 'residential' && p.price[0] <= 1550000);
   if (state.month === 1) {
     starter.slice(0,3).forEach((t, i) => state.market.push(makeProperty(t, i)));
   }
@@ -952,22 +996,42 @@ function showPage(page) {
   saveGame();
 }
 
+function currentCreditScore() {
+  const assets = state.owned.reduce((s,p) => s + p.price, 0);
+  const debtRatio = assets > 0 ? Math.min(1.5, state.bankDebt / assets) : (state.bankDebt > 0 ? 1 : 0);
+  return Math.max(300, Math.min(850, Math.round(820 - debtRatio * 330 + Math.min(state.cash / 15000, 45))));
+}
+
+function offeredLoanRate() {
+  const score = currentCreditScore();
+  // ריבית בנק ישראל + מרווח אשראי: מודל משחק סביר, לא הצעת אשראי אמיתית
+  const margin = score >= 760 ? 0.015 : score >= 700 ? 0.020 : score >= 620 ? 0.030 : 0.045;
+  return state.boiRate + margin;
+}
+
 function monthlyBankPaymentFor(amount, months) {
-  const monthlyRate = state.bankLoanRate / 12;
-  return Math.round(amount * monthlyRate + amount / months);
+  const annualRate = offeredLoanRate();
+  const monthlyRate = annualRate / 12;
+  // תשלום אנונה קבוע
+  if (monthlyRate === 0) return Math.round(amount / months);
+  return Math.round(amount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1));
 }
 
 function monthlyBankPayment() {
   if (state.bankDebt <= 0) return 0;
   const monthlyRate = state.bankLoanRate / 12;
-  return Math.round(state.bankDebt * monthlyRate + state.bankDebt / Math.max(1, state.bankLoanMonths));
+  const months = Math.max(1, state.bankLoanMonths);
+  if (monthlyRate === 0) return Math.round(state.bankDebt / months);
+  return Math.round(state.bankDebt * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1));
 }
 
 function takeLoan(amount, months = 60) {
+  const rate = offeredLoanRate();
   state.cash += amount;
   state.bankDebt += amount;
   state.bankLoanMonths = Math.max(state.bankLoanMonths, months);
-  setMessage(`קיבלת הלוואה מהבנק בסך ${fmt(amount)}. יתרת החוב שלך כעת היא ${fmt(state.bankDebt)}.`);
+  state.bankLoanRate = rate;
+  setMessage(`קיבלת הלוואה של ${fmt(amount)} בריבית שנתית ${(rate*100).toFixed(2)}%. יתרת החוב: ${fmt(state.bankDebt)}.`);
   saveGame();
   render();
   showPage('bank');
@@ -1061,22 +1125,31 @@ function nextMonth() {
 
   state.owned.forEach(p => {
     p.monthsOwned++;
-    const vacancy = Math.random() < 0.06;
+    const vacancyRisk = p.sector === 'hotel' ? 0.10 : p.sector === 'commercial' ? 0.08 : 0.045;
+    const vacancy = Math.random() < vacancyRisk;
     if (!vacancy) rentalIncome += p.rent;
     totalExpenses += p.expenses;
 
-    const marketChange = (Math.random() * 0.04) - 0.015;
+    // שינוי מחירים מתון: מגמה שנתית לפי סוג הנכס + רעש חודשי קטן
+    const annualTrend = p.annualGrowth ?? -0.013;
+    const monthlyTrend = Math.pow(1 + annualTrend, 1/12) - 1;
+    const sectorVolatility = p.sector === 'hotel' ? 0.006 : p.sector === 'commercial' ? 0.0045 : 0.003;
+    const marketNoise = (Math.random() * 2 - 1) * sectorVolatility;
+    const marketChange = monthlyTrend + marketNoise;
     p.price = Math.max(100000, Math.round(p.price * (1 + marketChange)));
 
-    const rentChange = (Math.random() * 0.012) - 0.003;
-    p.rent = Math.max(1000, Math.round(p.rent * (1 + rentChange)));
+    // שכ"ד בישראל: בסיס של כ-4% שנתי, עם תנודה חודשית קטנה
+    const annualRentGrowth = p.sector === 'residential' ? 0.040 : p.sector === 'commercial' ? 0.025 : 0.035;
+    const monthlyRentTrend = Math.pow(1 + annualRentGrowth, 1/12) - 1;
+    const rentNoise = (Math.random() * 2 - 1) * 0.0015;
+    p.rent = Math.max(1000, Math.round(p.rent * (1 + monthlyRentTrend + rentNoise)));
   });
 
   let bankPayment = 0;
   if (state.bankDebt > 0) {
+    bankPayment = monthlyBankPayment();
     const interest = state.bankDebt * (state.bankLoanRate / 12);
-    const principal = Math.min(state.bankDebt, state.bankDebt / Math.max(1, state.bankLoanMonths));
-    bankPayment = Math.round(interest + principal);
+    const principal = Math.max(0, Math.min(state.bankDebt, bankPayment - interest));
     state.bankDebt = Math.max(0, state.bankDebt - principal);
     state.bankLoanMonths = Math.max(1, state.bankLoanMonths - 1);
   }
@@ -1108,7 +1181,9 @@ function resetGame() {
     owned: [],
     market: [],
     bankDebt: 0,
-    bankLoanRate: 0.06,
+    bankLoanRate: 0.055,
+  boiRate: 0.035,
+  inflationRate: 0.016,
     bankLoanMonths: 60,
     currentPage: 'overview',
     auctionViewed: 0,
@@ -1267,9 +1342,9 @@ function renderBank() {
   const assets = state.owned.reduce((s,p) => s + p.price, 0);
   const netWorth = state.cash + assets - state.bankDebt;
   const monthlyPay = monthlyBankPayment();
-  const debtRatio = assets > 0 ? Math.min(1, state.bankDebt / assets) : (state.bankDebt > 0 ? 1 : 0);
-  const creditScore = Math.max(300, Math.min(850, Math.round(850 - debtRatio * 420 + Math.min(state.cash / 10000, 60))));
-  const status = creditScore >= 720 ? 'Good' : creditScore >= 600 ? 'Medium' : 'Low';
+  const debtRatio = assets > 0 ? Math.min(1.5, state.bankDebt / assets) : (state.bankDebt > 0 ? 1 : 0);
+  const creditScore = currentCreditScore();
+  const status = creditScore >= 720 ? 'טוב' : creditScore >= 600 ? 'בינוני' : 'נמוך';
 
   document.getElementById('bankCash').textContent = fmt(state.cash);
   document.getElementById('bankNetWorth').textContent = fmt(netWorth);
@@ -1289,7 +1364,7 @@ function renderBank() {
       <div class="loan-offer-title">${fmt(offer.amount)}</div>
       <div class="meta-grid">
         <div>תקופה</div><div>${offer.months} חודשים</div>
-        <div>ריבית</div><div>6% שנתי</div>
+        <div>ריבית מוצעת</div><div>${(offeredLoanRate()*100).toFixed(2)}% שנתי</div>
         <div>תשלום חודשי משוער</div><div><b>${fmt(monthlyBankPaymentFor(offer.amount, offer.months))}</b></div>
         <div>סוג</div><div>${offer.amount >= 500000 ? 'משכנתא עסקית' : 'הלוואה'}</div>
       </div>
@@ -1312,6 +1387,8 @@ function renderAuctions() {
         <div class="meta-grid">
           <div>הצעה נוכחית</div><div><b>${fmt(a.openingBid)}</b></div>
           <div>שווי שוק</div><div>${fmt(a.price)}</div>
+          <div>שכירות / הכנסה חודשית</div><div><b>${fmt(a.rent)}</b></div>
+          <div>תשואה משוערת לפי ההצעה</div><div><b>${((a.rent * 12) / a.openingBid * 100).toFixed(1)}%</b></div>
           <div>זמן נותר</div><div>${a.daysLeft} ימים</div>
           <div>הצעות</div><div>${a.bids}</div>
         </div>
