@@ -1734,9 +1734,6 @@ function renderTop() {
   document.getElementById('month').textContent = state.month;
   document.getElementById('bankPaymentQuick').textContent = fmt(monthlyBankPayment());
   document.getElementById('rentalIncomeBig').textContent = fmt(monthlyRent);
-  document.getElementById('sideCash').textContent = fmt(state.cash);
-  document.getElementById('sideMonth').textContent = state.month;
-
   document.getElementById('globalCash').textContent = fmt(state.cash);
   document.getElementById('globalNetWorth').textContent = fmt(netWorth);
   document.getElementById('globalAssets').textContent = fmt(assets);
