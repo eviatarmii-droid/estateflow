@@ -256,6 +256,7 @@
   .property-art.store { background: linear-gradient(135deg, #ffedd5, #fed7aa); }
   .property-art.house { background: linear-gradient(135deg, #e0f2fe, #fef3c7); }
   .property-art.warehouse { background: linear-gradient(135deg, #e5e7eb, #cbd5e1); }
+  .property-art.hotel { background: linear-gradient(135deg, #ede9fe, #fef3c7); }
 
   .property-body {
     padding: 14px;
@@ -818,7 +819,12 @@ const propertyTemplates = [
   {type:'חנות', area:'נתניה', price:[700000,1000000], rent:[4500,6500], expenses:[650,1000], icon:'🏪', art:'store'},
   {type:'מחסן מסחרי', area:'אשדוד', price:[500000,780000], rent:[3500,5200], expenses:[450,750], icon:'🏭', art:'warehouse'},
   {type:'בניין משרדים', area:'תל אביב', price:[1800000,2800000], rent:[9000,16000], expenses:[1200,1900], icon:'🏙️', art:'office'},
-  {type:'מרכז מסחרי', area:'ירושלים', price:[2200000,3600000], rent:[12000,22000], expenses:[1500,2400], icon:'🏬', art:'store'}
+  {type:'מרכז מסחרי', area:'ירושלים', price:[2200000,3600000], rent:[12000,22000], expenses:[1500,2400], icon:'🏬', art:'store'},
+  {type:'מסחר שכונתי', area:'רמת גן', price:[950000,1450000], rent:[6500,9500], expenses:[850,1350], icon:'🛍️', art:'store'},
+  {type:'קומת מסחר', area:'תל אביב', price:[1600000,2400000], rent:[10000,16000], expenses:[1300,2000], icon:'🏬', art:'store'},
+  {type:'מלון בוטיק', area:'אילת', price:[2200000,3400000], rent:[15000,24000], expenses:[3000,4800], icon:'🏨', art:'hotel'},
+  {type:'מלון עירוני', area:'ירושלים', price:[3200000,4800000], rent:[22000,34000], expenses:[4200,6500], icon:'🏨', art:'hotel'},
+  {type:'מלון נופש', area:'ים המלח', price:[4200000,6500000], rent:[30000,48000], expenses:[6500,9500], icon:'🏝️', art:'hotel'}
 ];
 
 const loanOffers = [
@@ -1123,8 +1129,9 @@ function getYield(p) {
 }
 
 function typeLabel(t) {
-  return t.includes('משרד') || t.includes('בניין') ? 'משרד'
-       : t.includes('חנות') || t.includes('מרכז') ? 'מסחרי'
+  return t.includes('מלון') ? 'מלון'
+       : t.includes('משרד') || t.includes('בניין') ? 'משרד'
+       : t.includes('חנות') || t.includes('מרכז') || t.includes('מסחר') ? 'מסחרי'
        : t.includes('מחסן') ? 'מחסן'
        : 'מגורים';
 }
