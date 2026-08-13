@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EstateFlow v8.6 - Expanded Market & Fixed Filters</title>
+<title>EstateFlow v8.7 - 18 Property Market Fix</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -1080,7 +1080,17 @@ if (state.boiRate === undefined) state.boiRate = 0.035;
 if (state.inflationRate === undefined) state.inflationRate = 0.016;
 if (state.bankLoanRate === undefined) state.bankLoanRate = 0.055;
 migrateLegacyHotels();
-if (!state.market.length) generateMarket();
+if (!state.market.length) {
+  generateMarket();
+} else if (state.market.length < 18) {
+  // שומרים את השוק הקיים ומשלימים אוטומטית ל-18 נכסים
+  while (state.market.length < 18) {
+    const t = propertyTemplates[rand(0, propertyTemplates.length - 1)];
+    state.market.push(makeProperty(t, state.market.length));
+  }
+  saveGame();
+}
+
 if (!state.auctions.length) generateAuctions();
 
 const navButtons = document.querySelectorAll('.nav-btn');
