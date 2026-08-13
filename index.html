@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EstateFlow v8 - Realistic Israel Economy</title>
+<title>EstateFlow v8.3 - Realistic Hotels</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -611,7 +611,7 @@
         <div class="global-account-value value-gray" id="globalDebt"></div>
       </div>
       <div class="global-account-item">
-        <div class="global-account-label">שכירות חודשית</div>
+        <div class="global-account-label">הכנסה חודשית מנכסים</div>
         <div class="global-account-value value-purple" id="globalRent"></div>
       </div>
     </div>
@@ -636,7 +636,7 @@
         <div class="kpi"><div class="kpi-label">שווי כולל</div><div class="kpi-value value-orange" id="netWorth"></div></div>
         <div class="kpi"><div class="kpi-label">שווי נכסים</div><div class="kpi-value value-blue" id="assets"></div></div>
         <div class="kpi"><div class="kpi-label">חוב לבנק</div><div class="kpi-value value-gray" id="debt"></div></div>
-        <div class="kpi"><div class="kpi-label">הכנסות שכירות</div><div class="kpi-value value-purple" id="rentalIncomeTop"></div></div>
+        <div class="kpi"><div class="kpi-label">הכנסה חודשית מנכסים</div><div class="kpi-value value-purple" id="rentalIncomeTop"></div></div>
       </div>
 
       <div class="message" id="message">ברוך הבא! יש לך ₪250,000. קנה נכסים במזומן, ואם חסר כסף אפשר לקחת הלוואה מהבנק.</div>
@@ -693,7 +693,7 @@
               <div class="mini-stat-value value-orange" id="bankPaymentQuick"></div>
             </div>
             <div class="mini-stat">
-              <div class="mini-stat-label">שווי שכירות חודשי</div>
+              <div class="mini-stat-label">הכנסה חודשית מנכסים</div>
               <div class="mini-stat-value value-green" id="rentalIncomeBig"></div>
             </div>
           </div>
@@ -995,9 +995,9 @@ const propertyTemplates = [
   {type:'מחסן מסחרי', area:'אשדוד', price:[1400000,2300000], rent:[8500,13500], expenses:[800,1300], icon:'🏭', art:'warehouse', sector:'commercial', annualGrowth:0.006},
 
   // מלונות — מוצגים כהשקעת נדל״ן מניב; ההכנסה היא נטו-תפעולית בקירוב לצורכי משחק
-  {type:'מלון בוטיק', area:'אילת', price:[8500000,13500000], rent:[52000,90000], expenses:[18000,32000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.010},
-  {type:'מלון עירוני', area:'ירושלים', price:[14000000,24000000], rent:[85000,150000], expenses:[30000,52000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008},
-  {type:'מלון נופש', area:'ים המלח', price:[18000000,32000000], rent:[115000,210000], expenses:[45000,80000], icon:'🏝️', art:'hotel', sector:'hotel', annualGrowth:0.010}
+  {type:'מלון בוטיק', area:'אילת', price:[9000000,14500000], rent:[55000,95000], expenses:[22000,38000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.010},
+  {type:'מלון עירוני', area:'ירושלים', price:[15000000,26000000], rent:[90000,160000], expenses:[36000,60000], icon:'🏨', art:'hotel', sector:'hotel', annualGrowth:0.008},
+  {type:'מלון נופש', area:'ים המלח', price:[20000000,35000000], rent:[125000,225000], expenses:[55000,95000], icon:'🏝️', art:'hotel', sector:'hotel', annualGrowth:0.010}
 ];
 
 const loanOffers = [
@@ -1009,6 +1009,59 @@ const loanOffers = [
 ];
 
 const localKey = 'realEstateEmpireV7';
+
+
+function migrateLegacyHotels() {
+  const migrate = (p) => {
+    if (!p || !(p.sector === 'hotel' || String(p.type || '').includes('מלון'))) return p;
+
+    p.sector = 'hotel';
+    p.art = 'hotel';
+
+    const isBoutique = String(p.type).includes('בוטיק');
+    const isUrban = String(p.type).includes('עירוני');
+    const isResort = String(p.type).includes('נופש');
+
+    let minPrice = 9000000, maxPrice = 14500000;
+    let minIncome = 55000, maxIncome = 95000;
+    let minExpenses = 22000, maxExpenses = 38000;
+
+    if (isUrban) {
+      minPrice = 15000000; maxPrice = 26000000;
+      minIncome = 90000; maxIncome = 160000;
+      minExpenses = 36000; maxExpenses = 60000;
+    } else if (isResort) {
+      minPrice = 20000000; maxPrice = 35000000;
+      minIncome = 125000; maxIncome = 225000;
+      minExpenses = 55000; maxExpenses = 95000;
+    }
+
+    // Only correct legacy hotel values that are clearly far below the new model.
+    if ((p.price || 0) < minPrice * 0.75) {
+      const ratio = Math.min(1, Math.max(0, ((p.price || 0) - 1000000) / 4000000));
+      p.price = Math.round(minPrice + (maxPrice - minPrice) * ratio);
+    }
+
+    if ((p.purchasePrice || 0) > 0 && p.purchasePrice < minPrice * 0.75) {
+      p.purchasePrice = Math.round(p.price * (0.96 + Math.random() * 0.08));
+    }
+
+    if ((p.rent || 0) < minIncome * 0.75) {
+      p.rent = Math.round(minIncome + (maxIncome - minIncome) * 0.25);
+    }
+
+    if ((p.expenses || 0) < minExpenses * 0.75) {
+      p.expenses = Math.round(minExpenses + (maxExpenses - minExpenses) * 0.25);
+    }
+
+    p.annualGrowth = p.annualGrowth ?? 0.01;
+    return p;
+  };
+
+  state.owned = (state.owned || []).map(migrate);
+  state.market = (state.market || []).map(migrate);
+  state.auctions = (state.auctions || []).map(migrate);
+}
 
 let state = loadGame() || {
   cash: 250000,
@@ -1031,6 +1084,7 @@ let state = loadGame() || {
 if (state.boiRate === undefined) state.boiRate = 0.035;
 if (state.inflationRate === undefined) state.inflationRate = 0.016;
 if (state.bankLoanRate === undefined) state.bankLoanRate = 0.055;
+migrateLegacyHotels();
 if (!state.market.length) generateMarket();
 if (!state.auctions.length) generateAuctions();
 
@@ -1190,6 +1244,8 @@ function generateAuctions() {
       price: marketPrice,
       openingBid,
       rent: p.rent,
+      expenses: p.expenses,
+      sector: p.sector,
       icon: p.icon,
       art: p.art,
       daysLeft,
@@ -1336,7 +1392,8 @@ function bidAuction(id) {
       price: a.openingBid,
       purchasePrice: a.openingBid,
       rent: a.rent,
-      expenses: Math.round(a.rent * 0.18),
+      expenses: a.expenses || Math.round(a.rent * (a.sector === 'hotel' ? 0.40 : 0.18)),
+      sector: a.sector || 'commercial',
       icon: a.icon,
       art: a.art,
       monthsOwned: 0
@@ -1394,7 +1451,7 @@ function nextMonth() {
   if (state.month % 3 === 0) generateMarket();
   if (state.month % 2 === 0) generateAuctions();
 
-  setMessage(`חודש ${state.month}: שכירות ${fmt(rentalIncome)}, הוצאות ${fmt(totalExpenses)}, החזר לבנק ${fmt(bankPayment)}. תזרים חודשי: ${fmt(monthlyNet)}.`);
+  setMessage(`חודש ${state.month}: הכנסות מנכסים ${fmt(rentalIncome)}, הוצאות ${fmt(totalExpenses)}, החזר לבנק ${fmt(bankPayment)}. תזרים חודשי: ${fmt(monthlyNet)}.`);
   saveGame();
   render();
 }
@@ -1432,8 +1489,26 @@ function resetGame() {
   showPage('overview');
 }
 
+
+function incomeLabel(p) {
+  return p && p.sector === 'hotel' ? 'הכנסה תפעולית חודשית' : 'שכירות חודשית';
+}
+
+function expenseLabel(p) {
+  return p && p.sector === 'hotel' ? 'הוצאות תפעול חודשיות' : 'הוצאות חודשיות';
+}
+
+function netMonthlyIncome(p) {
+  return Math.max(0, (p.rent || 0) - (p.expenses || 0));
+}
+
+function operatingYield(p, basisPrice = null) {
+  const price = basisPrice || p.price || 1;
+  return (netMonthlyIncome(p) * 12 / price) * 100;
+}
+
 function getYield(p) {
-  return ((p.rent * 12 - p.expenses * 12) / p.price * 100);
+  return operatingYield(p);
 }
 
 function typeLabel(t) {
@@ -1501,7 +1576,8 @@ function renderOwnedCards() {
         <div class="property-name">${p.type}</div>
         <div class="property-city">${p.area}</div>
         <div class="property-big">${fmt(p.price)}</div>
-        <div class="property-rent">שכירות: ${fmt(p.rent)} / חודש</div>
+        <div class="property-rent">${incomeLabel(p)}: ${fmt(p.rent)} / חודש</div>
+        ${p.sector === 'hotel' ? `<div style="margin-top:5px; color:#64748b; font-size:13px;">הוצאות תפעול: ${fmt(p.expenses)} / חודש</div>` : ''}
       </div>
     </div>
   `).join('');
@@ -1526,9 +1602,10 @@ function renderMarket() {
         <div class="detail-sub">${p.area} · ${typeLabel(p.type)}</div>
         <div class="meta-grid">
           <div>מחיר</div><div><b>${fmt(p.price)}</b></div>
-          <div>שכירות</div><div><b>${fmt(p.rent)} / חודש</b></div>
-          <div>הוצאות</div><div>${fmt(p.expenses)} / חודש</div>
-          <div>תשואה נטו משוערת</div><div><b>${getYield(p).toFixed(1)}%</b></div>
+          <div>${incomeLabel(p)}</div><div><b>${fmt(p.rent)} / חודש</b></div>
+          <div>${expenseLabel(p)}</div><div>${fmt(p.expenses)} / חודש</div>
+          <div>הכנסה נטו חודשית</div><div><b>${fmt(netMonthlyIncome(p))}</b></div>
+          <div>תשואה תפעולית נטו משוערת</div><div><b>${getYield(p).toFixed(1)}%</b></div>
         </div>
         <div class="card-actions">
           <button class="btn-orange btn-small" onclick="buyProperty(${p.id})">קנה עכשיו</button>
@@ -1557,8 +1634,9 @@ function renderPortfolio() {
           <div class="meta-grid">
             <div>שווי נוכחי</div><div><b>${fmt(p.price)}</b></div>
             <div>מחיר רכישה</div><div>${fmt(p.purchasePrice)}</div>
-            <div>שכירות</div><div>${fmt(p.rent)} / חודש</div>
-            <div>הוצאות</div><div>${fmt(p.expenses)} / חודש</div>
+            <div>${incomeLabel(p)}</div><div>${fmt(p.rent)} / חודש</div>
+            <div>${expenseLabel(p)}</div><div>${fmt(p.expenses)} / חודש</div>
+            <div>הכנסה נטו חודשית</div><div>${fmt(netMonthlyIncome(p))}</div>
             <div>חודשים בבעלות</div><div>${p.monthsOwned}</div>
             <div>שינוי ערך</div><div class="${gainClass}">${fmt(gain)}</div>
           </div>
@@ -1620,8 +1698,10 @@ function renderAuctions() {
         <div class="meta-grid">
           <div>הצעה נוכחית</div><div><b>${fmt(a.openingBid)}</b></div>
           <div>שווי שוק</div><div>${fmt(a.price)}</div>
-          <div>שכירות / הכנסה חודשית</div><div><b>${fmt(a.rent)}</b></div>
-          <div>תשואה משוערת לפי ההצעה</div><div><b>${((a.rent * 12) / a.openingBid * 100).toFixed(1)}%</b></div>
+          <div>${incomeLabel(a)}</div><div><b>${fmt(a.rent)}</b></div>
+          <div>${expenseLabel(a)}</div><div>${fmt(a.expenses || 0)}</div>
+          <div>הכנסה נטו חודשית</div><div><b>${fmt(Math.max(0, a.rent - (a.expenses || 0)))}</b></div>
+          <div>תשואה תפעולית נטו לפי ההצעה</div><div><b>${operatingYield(a, a.openingBid).toFixed(1)}%</b></div>
           <div>זמן נותר</div><div>${a.daysLeft} ימים</div>
           <div>הצעות</div><div>${a.bids}</div>
         </div>
