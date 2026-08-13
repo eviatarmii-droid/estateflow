@@ -441,6 +441,64 @@
     padding: 16px;
     background: #fff;
   }
+  .owner-lock {
+    max-width: 520px;
+    margin: 40px auto;
+    text-align: center;
+  }
+  .owner-pin {
+    width: 180px;
+    text-align: center;
+    font-size: 28px;
+    letter-spacing: 10px;
+    padding: 14px;
+    border: 2px solid #cbd5e1;
+    border-radius: 14px;
+    direction: ltr;
+  }
+  .owner-panel {
+    display: none;
+  }
+  .owner-panel.unlocked {
+    display: block;
+  }
+  .owner-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .owner-action-card {
+    background: #fbfcfe;
+    border: 1px solid #e5ebf3;
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .owner-action-card h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+  .owner-custom-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .owner-custom-row input {
+    flex: 1;
+    min-width: 150px;
+    border: 1px solid #d6dee8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  .owner-badge {
+    display: inline-block;
+    background: #ede9fe;
+    color: #6d28d9;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-weight: 800;
+    font-size: 12px;
+  }
   .mission-title {
     font-size: 20px;
     font-weight: 900;
@@ -521,6 +579,7 @@
       <button class="nav-btn" data-page="auctions"><span>מכרזים</span><span>🔨</span></button>
       <button class="nav-btn" data-page="missions"><span>משימות</span><span>🎯</span></button>
       <button class="nav-btn" data-page="portfolio"><span>תיק השקעות</span><span>💼</span></button>
+      <button class="nav-btn" data-page="owner"><span>בעלים</span><span>🔐</span></button>
     </div>
 
     <div class="sidebar-bottom">
@@ -825,6 +884,83 @@
       </div>
     </div>
 
+
+    <div id="page-owner" class="page">
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">ממשק בעלים 🔐</h1>
+          <div class="page-subtitle">כלי ניהול פרטיים למשחק</div>
+        </div>
+        <div id="ownerBadgeWrap"></div>
+      </div>
+
+      <div id="ownerLock" class="panel owner-lock">
+        <h2 class="panel-title" style="margin-bottom:10px;">כניסת בעלים</h2>
+        <div style="color:#64748b; margin-bottom:18px;">הזן קוד בעלים בן 4 ספרות</div>
+        <input id="ownerPin" class="owner-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+        <div style="margin-top:16px;">
+          <button class="btn-blue" onclick="unlockOwner()">פתח ממשק</button>
+        </div>
+        <div id="ownerError" style="color:#dc2626; margin-top:12px; font-weight:800;"></div>
+      </div>
+
+      <div id="ownerPanel" class="owner-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">ניהול כספים</h2>
+            <button class="btn-gray btn-small" onclick="lockOwner()">נעל ממשק</button>
+          </div>
+
+          <div class="owner-actions-grid">
+            <div class="owner-action-card">
+              <h3>הוסף מזומן</h3>
+              <div class="card-actions">
+                <button class="btn-blue btn-small" onclick="ownerAddCash(50000)">+ ₪50,000</button>
+                <button class="btn-blue btn-small" onclick="ownerAddCash(100000)">+ ₪100,000</button>
+                <button class="btn-blue btn-small" onclick="ownerAddCash(500000)">+ ₪500,000</button>
+                <button class="btn-blue btn-small" onclick="ownerAddCash(1000000)">+ ₪1,000,000</button>
+              </div>
+            </div>
+
+            <div class="owner-action-card">
+              <h3>סכום מותאם אישית</h3>
+              <div class="owner-custom-row">
+                <input id="ownerCustomCash" type="number" min="1" step="1000" placeholder="לדוגמה 250000">
+                <button class="btn-blue btn-small" onclick="ownerAddCustomCash()">הוסף</button>
+              </div>
+            </div>
+
+            <div class="owner-action-card">
+              <h3>חוב לבנק</h3>
+              <div style="color:#64748b; margin-bottom:12px;">אפס את יתרת החוב לבנק.</div>
+              <button class="btn-gold btn-small" onclick="ownerClearDebt()">אפס חוב</button>
+            </div>
+
+            <div class="owner-action-card">
+              <h3>שוק ומכרזים</h3>
+              <div class="card-actions">
+                <button class="btn-gray btn-small" onclick="ownerRefreshMarket()">רענן שוק</button>
+                <button class="btn-gray btn-small" onclick="ownerRefreshAuctions()">רענן מכרזים</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">מצב נוכחי</h2>
+          </div>
+          <div class="kpis" style="margin:0;">
+            <div class="kpi"><div class="kpi-label">מזומן</div><div class="kpi-value value-deep-orange" id="ownerCash"></div></div>
+            <div class="kpi"><div class="kpi-label">חוב לבנק</div><div class="kpi-value value-gray" id="ownerDebt"></div></div>
+            <div class="kpi"><div class="kpi-label">מספר נכסים</div><div class="kpi-value" id="ownerProperties"></div></div>
+            <div class="kpi"><div class="kpi-label">חודש</div><div class="kpi-value" id="ownerMonth"></div></div>
+            <div class="kpi"><div class="kpi-label">שווי נקי</div><div class="kpi-value value-orange" id="ownerNetWorth"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -904,6 +1040,91 @@ navButtons.forEach(btn => {
     showPage(btn.dataset.page);
   });
 });
+
+
+const OWNER_PIN = '1994';
+let ownerUnlocked = false;
+
+function unlockOwner() {
+  const pin = document.getElementById('ownerPin').value;
+  const error = document.getElementById('ownerError');
+
+  if (pin === OWNER_PIN) {
+    ownerUnlocked = true;
+    document.getElementById('ownerLock').style.display = 'none';
+    document.getElementById('ownerPanel').classList.add('unlocked');
+    document.getElementById('ownerBadgeWrap').innerHTML = '<span class="owner-badge">מצב בעלים פעיל</span>';
+    error.textContent = '';
+    renderOwner();
+  } else {
+    error.textContent = 'קוד שגוי';
+    document.getElementById('ownerPin').value = '';
+  }
+}
+
+function lockOwner() {
+  ownerUnlocked = false;
+  document.getElementById('ownerLock').style.display = 'block';
+  document.getElementById('ownerPanel').classList.remove('unlocked');
+  document.getElementById('ownerBadgeWrap').innerHTML = '';
+  document.getElementById('ownerPin').value = '';
+  document.getElementById('ownerError').textContent = '';
+}
+
+function ownerRequireUnlock() {
+  return ownerUnlocked === true;
+}
+
+function ownerAddCash(amount) {
+  if (!ownerRequireUnlock()) return;
+  state.cash += amount;
+  setMessage(`ממשק בעלים: נוספו ${fmt(amount)} למזומן.`);
+  saveGame();
+  render();
+}
+
+function ownerAddCustomCash() {
+  if (!ownerRequireUnlock()) return;
+  const input = document.getElementById('ownerCustomCash');
+  const amount = Math.round(Number(input.value));
+  if (!Number.isFinite(amount) || amount <= 0) return;
+  ownerAddCash(amount);
+  input.value = '';
+}
+
+function ownerClearDebt() {
+  if (!ownerRequireUnlock()) return;
+  state.bankDebt = 0;
+  state.bankLoanMonths = 60;
+  setMessage('ממשק בעלים: החוב לבנק אופס.');
+  saveGame();
+  render();
+}
+
+function ownerRefreshMarket() {
+  if (!ownerRequireUnlock()) return;
+  generateMarket();
+  setMessage('ממשק בעלים: שוק הנדל״ן רוענן.');
+  render();
+}
+
+function ownerRefreshAuctions() {
+  if (!ownerRequireUnlock()) return;
+  generateAuctions();
+  setMessage('ממשק בעלים: המכרזים רועננו.');
+  render();
+}
+
+function renderOwner() {
+  if (!ownerUnlocked) return;
+  const assets = state.owned.reduce((s,p) => s + p.price, 0);
+  const netWorth = state.cash + assets - state.bankDebt;
+  document.getElementById('ownerCash').textContent = fmt(state.cash);
+  document.getElementById('ownerDebt').textContent = fmt(state.bankDebt);
+  document.getElementById('ownerProperties').textContent = state.owned.length;
+  document.getElementById('ownerMonth').textContent = state.month;
+  document.getElementById('ownerNetWorth').textContent = fmt(netWorth);
+}
 
 function saveGame() {
   localStorage.setItem(localKey, JSON.stringify(state));
@@ -993,6 +1214,18 @@ function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   navButtons.forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  if (page === 'owner') {
+    if (ownerUnlocked) {
+      document.getElementById('ownerLock').style.display = 'none';
+      document.getElementById('ownerPanel').classList.add('unlocked');
+      document.getElementById('ownerBadgeWrap').innerHTML = '<span class="owner-badge">מצב בעלים פעיל</span>';
+      renderOwner();
+    } else {
+      document.getElementById('ownerLock').style.display = 'block';
+      document.getElementById('ownerPanel').classList.remove('unlocked');
+      document.getElementById('ownerBadgeWrap').innerHTML = '';
+    }
+  }
   saveGame();
 }
 
@@ -1464,6 +1697,7 @@ function render() {
   renderBank();
   renderAuctions();
   renderMissions();
+  renderOwner();
 }
 
 render();
